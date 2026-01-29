@@ -1,17 +1,13 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+
+import { useVolcano } from "@/lib/volcano";
 
 import { PanelIcon } from "../icons";
 import DimensionSection from "./dimension";
 import DisplayModeSection from "./display-mode";
-import MountainList, { Mountain } from "./mountain-list";
+import MountainList from "./mountain-list";
 import SensorSection from "./sensor";
 import TimeSeriesSection from "./time-series";
 
@@ -36,38 +32,9 @@ function getServerSnapshot(): boolean {
   return false;
 }
 
-const MOUNTAINS: Mountain[] = [
-  {
-    id: "gunung-agung",
-    name: "Gunung Agung",
-    latitude: -8.34,
-    longitude: 115.51,
-    elevation: 3031,
-    series: 6,
-    dates: [
-      "2024-01-15",
-      "2024-02-15",
-      "2024-03-15",
-      "2024-04-15",
-      "2024-05-15",
-      "2024-06-15",
-    ],
-  },
-  {
-    id: "gunung-kelud",
-    name: "Gunung Kelud",
-    latitude: -7.93,
-    longitude: 112.31,
-    elevation: 1731,
-    series: 2,
-    dates: ["2024-01-20", "2024-02-20"],
-  },
-];
-
 const LeftSideBar = () => {
-  const [activeMountainId, setActiveMountainId] = useState<string>(
-    MOUNTAINS[0].id,
-  );
+  const { mountains, activeMountainId, activeMountain, setActiveMountainId } =
+    useVolcano();
   const isCollapsed = useSyncExternalStore(
     subscribe,
     getSnapshot,
@@ -90,8 +57,6 @@ const LeftSideBar = () => {
   }, []);
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-
-  const activeMountain = MOUNTAINS.find((m) => m.id === activeMountainId);
 
   const timeSeriesDates = useMemo(() => {
     if (!activeMountain) return [];
@@ -116,9 +81,9 @@ const LeftSideBar = () => {
         />
       </button>
       {!isCollapsed && (
-        <div className="hidden lg:block flex-1 p-4 min-w-80 overflow-hidden animate-fade-in overflow-y-auto gap-4">
+        <div className="hidden lg:flex lg:flex-col flex-1 p-4 min-w-80 overflow-hidden animate-fade-in overflow-y-auto gap-4">
           <MountainList
-            mountains={MOUNTAINS}
+            mountains={mountains}
             activeMountainId={activeMountainId}
             onMountainSelect={setActiveMountainId}
           />
