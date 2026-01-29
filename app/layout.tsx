@@ -1,3 +1,4 @@
+// @ts-expect-error - expected
 import "./globals.css";
 
 import type { Metadata } from "next";
@@ -5,6 +6,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 
 import { LanguageProvider } from "@/lib/i18n";
+import { VolcanoProvider } from "@/lib/volcano";
 
 import Navbar from "../components/navbar";
 
@@ -28,10 +30,12 @@ export default function RootLayout({
       <body className={`${jakarta.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <LanguageProvider>
-            <div className="flex flex-col h-screen">
-              <Navbar />
-              {children}
-            </div>
+            <VolcanoProvider>
+              <div className="flex flex-col h-screen">
+                <Navbar />
+                {children}
+              </div>
+            </VolcanoProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

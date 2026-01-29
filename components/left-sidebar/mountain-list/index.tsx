@@ -3,20 +3,11 @@
 import React from "react";
 
 import { useTranslation } from "@/lib/i18n";
+import { Mountain } from "@/lib/volcano";
 
 import MountainCard from "../../cards/mountain-card";
 import { StrokeMountainIcon } from "../../icons";
 import SectionHeader from "../../section-header";
-
-export interface Mountain {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  elevation: number;
-  series: number;
-  dates: string[];
-}
 
 interface MountainListProps {
   mountains: Mountain[];
