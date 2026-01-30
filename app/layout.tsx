@@ -1,4 +1,3 @@
-// @ts-expect-error - expected
 import "./globals.css";
 
 import type { Metadata } from "next";
