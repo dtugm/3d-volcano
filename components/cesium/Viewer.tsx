@@ -1,18 +1,19 @@
 "use client";
 
-// @ts-expect-error - CSS import from cesium package
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import {
   Cartesian3,
   Cesium3DTileset as Cesium3DTilesetType,
+  CesiumTerrainProvider,
   HeadingPitchRange,
   Ion,
   Math as CesiumMath,
+  TerrainProvider,
   Viewer as CesiumViewer,
 } from "cesium";
-import { useEffect, useRef } from "react";
-import { Cesium3DTileset, CesiumComponentRef, Viewer } from "resium";
+import { useEffect, useRef, useState } from "react";
+import { Cesium3DTileset, CesiumComponentRef, Globe, Viewer } from "resium";
 
 import { useVolcano } from "@/lib/volcano";
 
@@ -45,6 +46,8 @@ export default function CesiumViewerComponent() {
   const { activeMountain, activeMountainId } = useVolcano();
   const previousMountainIdRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
+  const [terrainProvider, setTerrainProvider] =
+    useState<TerrainProvider | null>(null);
 
   const handleTilesetReady = (tileset: Cesium3DTilesetType) => {
     const viewer = viewerRef.current?.cesiumElement;
@@ -103,6 +106,26 @@ export default function CesiumViewerComponent() {
     }
   }, [activeMountain, activeMountainId]);
 
+  // Load terrain provider when active mountain has terrain data
+  useEffect(() => {
+    let cancelled = false;
+
+    if (activeMountain?.terrainUrl) {
+      CesiumTerrainProvider.fromUrl(activeMountain.terrainUrl, {
+        requestVertexNormals: true,
+      }).then((provider) => {
+        if (!cancelled) {
+          setTerrainProvider(provider);
+        }
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      setTerrainProvider(null);
+    };
+  }, [activeMountain?.terrainUrl]);
+
   return (
     <Viewer
       ref={viewerRef}
@@ -116,6 +139,7 @@ export default function CesiumViewerComponent() {
       navigationHelpButton={false}
       fullscreenButton={false}
     >
+      {terrainProvider && <Globe terrainProvider={terrainProvider} />}
       {activeMountain?.tilesetUrl && (
         <Cesium3DTileset
           key={activeMountainId}
