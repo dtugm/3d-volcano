@@ -7,13 +7,21 @@ import {
   Cesium3DTileset as Cesium3DTilesetType,
   CesiumTerrainProvider,
   HeadingPitchRange,
+  ImageryProvider,
   Ion,
   Math as CesiumMath,
   TerrainProvider,
+  TileMapServiceImageryProvider,
   Viewer as CesiumViewer,
 } from "cesium";
 import { useEffect, useRef, useState } from "react";
-import { Cesium3DTileset, CesiumComponentRef, Globe, Viewer } from "resium";
+import {
+  Cesium3DTileset,
+  CesiumComponentRef,
+  Globe,
+  ImageryLayer,
+  Viewer,
+} from "resium";
 
 import { useVolcano } from "@/lib/volcano";
 
@@ -48,6 +56,8 @@ export default function CesiumViewerComponent() {
   const isInitialLoadRef = useRef(true);
   const [terrainProvider, setTerrainProvider] =
     useState<TerrainProvider | null>(null);
+  const [orthoImageryProvider, setOrthoImageryProvider] =
+    useState<ImageryProvider | null>(null);
 
   const handleTilesetReady = (tileset: Cesium3DTilesetType) => {
     const viewer = viewerRef.current?.cesiumElement;
@@ -126,6 +136,28 @@ export default function CesiumViewerComponent() {
     };
   }, [activeMountain?.terrainUrl]);
 
+  // Load ortho imagery provider when active mountain has ortho data
+  useEffect(() => {
+    let cancelled = false;
+
+    if (activeMountain?.orthoUrl) {
+      TileMapServiceImageryProvider.fromUrl(activeMountain.orthoUrl, {
+        fileExtension: "png",
+        maximumLevel: 17,
+        minimumLevel: 11,
+      }).then((provider) => {
+        if (!cancelled) {
+          setOrthoImageryProvider(provider);
+        }
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      setOrthoImageryProvider(null);
+    };
+  }, [activeMountain?.orthoUrl]);
+
   return (
     <Viewer
       ref={viewerRef}
@@ -140,6 +172,9 @@ export default function CesiumViewerComponent() {
       fullscreenButton={false}
     >
       {terrainProvider && <Globe terrainProvider={terrainProvider} />}
+      {orthoImageryProvider && (
+        <ImageryLayer imageryProvider={orthoImageryProvider} />
+      )}
       {activeMountain?.tilesetUrl && (
         <Cesium3DTileset
           key={activeMountainId}
