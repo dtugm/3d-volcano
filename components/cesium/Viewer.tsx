@@ -6,14 +6,22 @@ import {
   Cartesian3,
   Cesium3DTileset as Cesium3DTilesetType,
   CesiumTerrainProvider,
+  EllipsoidTerrainProvider,
   HeadingPitchRange,
+  ImageryProvider,
   Ion,
   Math as CesiumMath,
   TerrainProvider,
+  TileMapServiceImageryProvider,
   Viewer as CesiumViewer,
 } from "cesium";
 import { useEffect, useRef, useState } from "react";
-import { Cesium3DTileset, CesiumComponentRef, Globe, Viewer } from "resium";
+import {
+  Cesium3DTileset,
+  CesiumComponentRef,
+  ImageryLayer,
+  Viewer,
+} from "resium";
 
 import { useVolcano } from "@/lib/volcano";
 
@@ -43,11 +51,13 @@ const FLY_DURATION = 1.5; // seconds
 
 export default function CesiumViewerComponent() {
   const viewerRef = useRef<CesiumComponentRef<CesiumViewer>>(null);
-  const { activeMountain, activeMountainId } = useVolcano();
+  const { activeMountain, activeMountainId, layerVisibility } = useVolcano();
   const previousMountainIdRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
   const [terrainProvider, setTerrainProvider] =
     useState<TerrainProvider | null>(null);
+  const [orthoImageryProvider, setOrthoImageryProvider] =
+    useState<ImageryProvider | null>(null);
 
   const handleTilesetReady = (tileset: Cesium3DTilesetType) => {
     const viewer = viewerRef.current?.cesiumElement;
@@ -126,6 +136,42 @@ export default function CesiumViewerComponent() {
     };
   }, [activeMountain?.terrainUrl]);
 
+  // Load ortho imagery provider when active mountain has ortho data
+  useEffect(() => {
+    let cancelled = false;
+
+    if (activeMountain?.orthoUrl) {
+      TileMapServiceImageryProvider.fromUrl(activeMountain.orthoUrl, {
+        fileExtension: "png",
+        maximumLevel: 17,
+        minimumLevel: 11,
+      }).then((provider) => {
+        if (!cancelled) {
+          setOrthoImageryProvider(provider);
+        }
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      setOrthoImageryProvider(null);
+    };
+  }, [activeMountain?.orthoUrl]);
+
+  // Update terrain provider based on visibility toggle
+  useEffect(() => {
+    const viewer = viewerRef.current?.cesiumElement;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    if (layerVisibility.terrain && terrainProvider) {
+      viewer.scene.globe.terrainProvider = terrainProvider;
+    } else {
+      // Reset to default ellipsoid terrain (flat)
+      viewer.scene.globe.terrainProvider =
+        new EllipsoidTerrainProvider();
+    }
+  }, [layerVisibility.terrain, terrainProvider]);
+
   return (
     <Viewer
       ref={viewerRef}
@@ -139,8 +185,10 @@ export default function CesiumViewerComponent() {
       navigationHelpButton={false}
       fullscreenButton={false}
     >
-      {terrainProvider && <Globe terrainProvider={terrainProvider} />}
-      {activeMountain?.tilesetUrl && (
+      {layerVisibility.ortho && orthoImageryProvider && (
+        <ImageryLayer imageryProvider={orthoImageryProvider} />
+      )}
+      {layerVisibility.tiles3d && activeMountain?.tilesetUrl && (
         <Cesium3DTileset
           key={activeMountainId}
           url={activeMountain.tilesetUrl}

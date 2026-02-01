@@ -8,6 +8,7 @@ export interface Mountain {
   dates: string[];
   tilesetUrl?: string;
   terrainUrl?: string;
+  orthoUrl?: string;
 }
 
 export const MOUNTAINS: Mountain[] = [
@@ -30,6 +31,8 @@ export const MOUNTAINS: Mountain[] = [
       "https://digital-twin-ugm.s3.ap-southeast-1.amazonaws.com/dt-volcano/pnts_gunung_agung/tileset.json",
     terrainUrl:
       "https://digital-twin-ugm.s3.ap-southeast-1.amazonaws.com/dt-volcano/2017_wgs2",
+    orthoUrl:
+      "https://digital-twin-ugm.s3.ap-southeast-1.amazonaws.com/ortho-collection/volcano/gn_agung_2017",
   },
   {
     id: "gunung-kelud",

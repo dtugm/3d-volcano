@@ -23,10 +23,9 @@ export const id: Translations = {
   },
   displayMode: {
     title: "Mode Tampilan",
-    mesh3d: "Mesh 3D",
+    terrain: "Terrain",
     ortho: "Ortho",
-    change: "Perubahan",
-    globe: "Globe",
+    tiles3d: "3D Tiles",
   },
   sensor: {
     title: "Sensor",
