@@ -6,6 +6,7 @@ import {
   Cartesian3,
   Cesium3DTileset as Cesium3DTilesetType,
   CesiumTerrainProvider,
+  EllipsoidTerrainProvider,
   HeadingPitchRange,
   ImageryProvider,
   Ion,
@@ -18,7 +19,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   Cesium3DTileset,
   CesiumComponentRef,
-  Globe,
   ImageryLayer,
   Viewer,
 } from "resium";
@@ -51,7 +51,7 @@ const FLY_DURATION = 1.5; // seconds
 
 export default function CesiumViewerComponent() {
   const viewerRef = useRef<CesiumComponentRef<CesiumViewer>>(null);
-  const { activeMountain, activeMountainId } = useVolcano();
+  const { activeMountain, activeMountainId, layerVisibility } = useVolcano();
   const previousMountainIdRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
   const [terrainProvider, setTerrainProvider] =
@@ -158,6 +158,20 @@ export default function CesiumViewerComponent() {
     };
   }, [activeMountain?.orthoUrl]);
 
+  // Update terrain provider based on visibility toggle
+  useEffect(() => {
+    const viewer = viewerRef.current?.cesiumElement;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    if (layerVisibility.terrain && terrainProvider) {
+      viewer.scene.globe.terrainProvider = terrainProvider;
+    } else {
+      // Reset to default ellipsoid terrain (flat)
+      viewer.scene.globe.terrainProvider =
+        new EllipsoidTerrainProvider();
+    }
+  }, [layerVisibility.terrain, terrainProvider]);
+
   return (
     <Viewer
       ref={viewerRef}
@@ -171,11 +185,10 @@ export default function CesiumViewerComponent() {
       navigationHelpButton={false}
       fullscreenButton={false}
     >
-      {terrainProvider && <Globe terrainProvider={terrainProvider} />}
-      {orthoImageryProvider && (
+      {layerVisibility.ortho && orthoImageryProvider && (
         <ImageryLayer imageryProvider={orthoImageryProvider} />
       )}
-      {activeMountain?.tilesetUrl && (
+      {layerVisibility.tiles3d && activeMountain?.tilesetUrl && (
         <Cesium3DTileset
           key={activeMountainId}
           url={activeMountain.tilesetUrl}

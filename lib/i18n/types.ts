@@ -26,10 +26,9 @@ export interface Translations {
   };
   displayMode: {
     title: string;
-    mesh3d: string;
+    terrain: string;
     ortho: string;
-    change: string;
-    globe: string;
+    tiles3d: string;
   };
   sensor: {
     title: string;

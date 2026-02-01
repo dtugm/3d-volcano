@@ -1,46 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 
 import { useTranslation } from "@/lib/i18n";
+import { LayerType, useVolcano } from "@/lib/volcano";
 
-import { BoxIcon, EarthIcon, LayersIcon, MapIcon } from "../../icons";
+import { BoxIcon, LayersIcon, MapIcon } from "../../icons";
 import SectionHeader from "../../section-header";
 import DisplayModeButton from "./display-mode-button";
 
-export type DisplayMode = "mesh3d" | "ortho" | "change" | "globe";
-
 interface DisplayModeConfig {
-  id: DisplayMode;
+  id: LayerType;
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
   color: string;
 }
 
 const DISPLAY_MODES: DisplayModeConfig[] = [
-  { id: "mesh3d", icon: BoxIcon, color: "#52A869" },
+  { id: "terrain", icon: LayersIcon, color: "#E8764B" },
   { id: "ortho", icon: MapIcon, color: "#4285F4" },
-  { id: "change", icon: LayersIcon, color: "#E8764B" },
-  { id: "globe", icon: EarthIcon, color: "#E07B91" },
+  { id: "tiles3d", icon: BoxIcon, color: "#52A869" },
 ];
 
-interface DisplayModeSectionProps {
-  defaultMode?: DisplayMode;
-  onModeChange?: (mode: DisplayMode) => void;
-}
-
-const DisplayModeSection: React.FC<DisplayModeSectionProps> = ({
-  defaultMode = "globe",
-  onModeChange,
-}) => {
+const DisplayModeSection: React.FC = () => {
   const { t } = useTranslation();
-  const [activeMode, setActiveMode] = useState<DisplayMode>(defaultMode);
+  const { layerVisibility, toggleLayer } = useVolcano();
 
-  const handleModeChange = (mode: DisplayMode) => {
-    setActiveMode(mode);
-    onModeChange?.(mode);
-  };
-
-  const getModeLabel = (mode: DisplayMode): string => {
+  const getModeLabel = (mode: LayerType): string => {
     return t.displayMode[mode];
   };
 
@@ -61,8 +46,8 @@ const DisplayModeSection: React.FC<DisplayModeSectionProps> = ({
                 />
               }
               label={getModeLabel(mode.id)}
-              isActive={activeMode === mode.id}
-              onClick={() => handleModeChange(mode.id)}
+              isActive={layerVisibility[mode.id]}
+              onClick={() => toggleLayer(mode.id)}
             />
           );
         })}
