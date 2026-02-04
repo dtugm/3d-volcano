@@ -88,14 +88,16 @@ const LeftSideBar = () => {
             onMountainSelect={setActiveMountainId}
           />
 
-          <TimeSeriesSection dates={timeSeriesDates} />
-
-          <SensorSection />
-
           <DisplayModeSection />
 
-          <DimensionSection />
+          {/* Disable dulu */}
+          <div className="pointer-events-none opacity-50 flex flex-col gap-4">
+            <TimeSeriesSection dates={timeSeriesDates} />
+            <SensorSection />
+            <DimensionSection />
+          </div>
         </div>
+
       )}
     </div>
   );
