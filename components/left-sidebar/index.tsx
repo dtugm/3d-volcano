@@ -89,10 +89,12 @@ const LeftSideBar = () => {
               activeMountainId={activeMountainId}
               onMountainSelect={setActiveMountainId}
             />
+            <DisplayModeSection />
+            <div className="pointer-events-none opacity-50 flex flex-col gap-4">
             <TimeSeriesSection dates={timeSeriesDates} />
             <SensorSection />
-            <DisplayModeSection />
             <DimensionSection />
+            </div>
           </div>
         )}
       </div>
