@@ -1,3 +1,9 @@
+export interface YearData {
+  tilesetUrl?: string;
+  terrainUrl?: string;
+  orthoUrl?: string;
+}
+
 export interface Mountain {
   id: string;
   name: string;
@@ -5,10 +11,8 @@ export interface Mountain {
   longitude: number;
   elevation: number;
   series: number;
-  dates: string[];
-  tilesetUrl?: string;
-  terrainUrl?: string;
-  orthoUrl?: string;
+  years: string[];
+  yearData: Record<string, YearData>;
 }
 
 export const MOUNTAINS: Mountain[] = [
@@ -18,21 +22,18 @@ export const MOUNTAINS: Mountain[] = [
     latitude: -8.34,
     longitude: 115.51,
     elevation: 3031,
-    series: 6,
-    dates: [
-      "2024-01-15",
-      "2024-02-15",
-      "2024-03-15",
-      "2024-04-15",
-      "2024-05-15",
-      "2024-06-15",
-    ],
-    tilesetUrl:
-      "https://digital-twin-ugm.s3.ap-southeast-1.amazonaws.com/dt-volcano/pnts_gunung_agung/tileset.json",
-    terrainUrl:
-      "https://digital-twin-ugm.s3.ap-southeast-1.amazonaws.com/dt-volcano/2017_wgs2",
-    orthoUrl:
-      "https://digital-twin-ugm.s3.ap-southeast-1.amazonaws.com/ortho-collection/volcano/gn_agung_2017",
+    series: 2,
+    years: ["2020", "2026"],
+    yearData: {
+      "2020": {
+        terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-agung/2020",
+        orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-agung/2020",
+      },
+      "2026": {
+        terrainUrl: "",
+        orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-agung/2026",
+      },
+    },
   },
   {
     id: "gunung-kelud",
@@ -41,7 +42,16 @@ export const MOUNTAINS: Mountain[] = [
     longitude: 112.31,
     elevation: 1731,
     series: 2,
-    dates: ["2024-01-20", "2024-02-20"],
-    // No tilesetUrl yet - not ready
+    years: ["2014", "2026"],
+    yearData: {
+      "2014": {
+        terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-kelud/2014",
+        orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-kelud/2014",
+      },
+      "2026": {
+        terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-kelud/2026",
+        orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-kelud/2026",
+      },
+    },
   },
 ];

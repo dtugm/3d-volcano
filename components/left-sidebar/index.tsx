@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useVolcano } from "@/lib/volcano";
+
 import { useSidebar } from "@/lib/app/useSidebar";
+import { useVolcano } from "@/lib/volcano";
 
 import { PanelIcon } from "../icons";
 import DimensionSection from "./dimension";
@@ -29,9 +30,9 @@ const LeftSideBar = () => {
 
   const timeSeriesDates = useMemo(() => {
     if (!activeMountain) return [];
-    return activeMountain.dates.map((date) => ({
-      date,
-      label: date,
+    return activeMountain.years.map((year) => ({
+      date: year,
+      label: year,
     }));
   }, [activeMountain]);
 
@@ -49,11 +50,12 @@ const LeftSideBar = () => {
         id="left-sidebar"
         className={`
           fixed lg:relative inset-y-0 left-0 z-30 lg:z-90
-          flex flex-col shrink-0 bg-background 
+          flex flex-col shrink-0 bg-background
           transition-transform duration-300 ease-in-out
-          ${isCollapsed 
-            ? '-translate-x-full lg:translate-x-0 lg:w-5' 
-            : 'translate-x-0 w-80 lg:w-80'
+          ${
+            isCollapsed
+              ? "-translate-x-full lg:translate-x-0 lg:w-5"
+              : "translate-x-0 w-80 lg:w-80"
           }
           h-full
           border-r border-slate-200 dark:border-slate-800
@@ -62,18 +64,18 @@ const LeftSideBar = () => {
         <button
           onClick={toggleSidebar}
           className={`
-            absolute top-1/2 -translate-y-1/2 z-50 
-            p-1 rounded-full 
-            bg-slate-200 dark:bg-slate-700 
-            hover:bg-slate-300 dark:hover:bg-slate-600 
+            absolute top-1/2 -translate-y-1/2 z-50
+            p-1 rounded-full
+            bg-slate-200 dark:bg-slate-700
+            hover:bg-slate-300 dark:hover:bg-slate-600
             transition-colors cursor-pointer shadow-md
-            
+
             /* Posisi Horizontal */
-            right-0 
+            right-0
             translate-x-full lg:translate-x-1/2
-            
+
             /* Sedikit margin di mobile agar tidak terlalu mepet layar jika diinginkan */
-            mr-[-2px] lg:mr-0
+            -mr-0.5 lg:mr-0
           `}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
@@ -90,10 +92,10 @@ const LeftSideBar = () => {
               onMountainSelect={setActiveMountainId}
             />
             <DisplayModeSection />
-            <div className="pointer-events-none opacity-50 flex flex-col gap-4">
             <TimeSeriesSection dates={timeSeriesDates} />
-            <SensorSection />
-            <DimensionSection />
+            <div className="pointer-events-none opacity-50 flex flex-col gap-4">
+              <SensorSection />
+              <DimensionSection />
             </div>
           </div>
         )}

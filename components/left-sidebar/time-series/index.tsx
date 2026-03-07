@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { useTranslation } from "@/lib/i18n";
+import { useVolcano } from "@/lib/volcano";
 
 import { CalendarIcon, GitCompareIcon } from "../../icons";
 import SectionHeader from "../../section-header";
@@ -21,12 +22,20 @@ interface TimeSeriesPlayerProps {
 
 const TimeSeriesPlayer: React.FC<TimeSeriesPlayerProps> = ({ dates }) => {
   const { t } = useTranslation();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const { setActiveYear } = useVolcano();
+  const [currentIndex, setCurrentIndex] = useState(dates.length - 1);
   const [isPlaying, setIsPlaying] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const maxIndex = dates.length - 1;
   const currentDate = dates[currentIndex];
+
+  // Sync active year in context whenever currentIndex changes
+  useEffect(() => {
+    if (dates[currentIndex]) {
+      setActiveYear(dates[currentIndex].date);
+    }
+  }, [currentIndex, dates, setActiveYear]);
 
   const stopPlayback = useCallback(() => {
     if (intervalRef.current) {
@@ -46,7 +55,7 @@ const TimeSeriesPlayer: React.FC<TimeSeriesPlayerProps> = ({ dates }) => {
         }
         return prev + 1;
       });
-    }, 1000);
+    }, 3000);
   }, [maxIndex, stopPlayback]);
 
   const handlePlayPause = useCallback(() => {
