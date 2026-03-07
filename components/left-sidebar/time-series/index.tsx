@@ -132,7 +132,15 @@ interface TimeSeriesSectionProps {
 
 const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
   const { t } = useTranslation();
-  const [comparisonEnabled, setComparisonEnabled] = useState(false);
+  const {
+    activeMountain,
+    comparisonEnabled,
+    setComparisonEnabled,
+    comparisonLeftYear,
+    setComparisonLeftYear,
+    comparisonRightYear,
+    setComparisonRightYear,
+  } = useVolcano();
 
   // Create a stable key based on dates array to reset player state when dates change
   const datesKey = dates.map((d) => d.date).join(",");
@@ -141,6 +149,8 @@ const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
     return null;
   }
 
+  const years = activeMountain?.years ?? [];
+
   return (
     <section id="time-series" className="flex flex-col gap-2">
       <SectionHeader
@@ -148,9 +158,9 @@ const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
         icon={<CalendarIcon className="w-3.5 h-3.5 dark:stroke-[#90A1B9]" />}
       />
 
-      <TimeSeriesPlayer key={datesKey} dates={dates} />
+      {!comparisonEnabled && <TimeSeriesPlayer key={datesKey} dates={dates} />}
 
-      <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5">
+      <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 flex flex-col gap-3">
         <Toggle
           checked={comparisonEnabled}
           onChange={setComparisonEnabled}
@@ -161,6 +171,43 @@ const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
             </span>
           }
         />
+
+        {comparisonEnabled && (
+          <div className="flex gap-2">
+            <label className="flex-1">
+              <span className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">
+                {t.timeSeries.leftYear}
+              </span>
+              <select
+                value={comparisonLeftYear}
+                onChange={(e) => setComparisonLeftYear(e.target.value)}
+                className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-2 py-1.5"
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex-1">
+              <span className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">
+                {t.timeSeries.rightYear}
+              </span>
+              <select
+                value={comparisonRightYear}
+                onChange={(e) => setComparisonRightYear(e.target.value)}
+                className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-2 py-1.5"
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
       </div>
     </section>
   );

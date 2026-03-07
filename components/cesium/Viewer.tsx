@@ -12,6 +12,7 @@ import {
   ImageryProvider,
   Ion,
   Math as CesiumMath,
+  SplitDirection,
   TerrainProvider,
   TileMapServiceImageryProvider,
   Viewer as CesiumViewer,
@@ -58,6 +59,10 @@ export default function CesiumViewerComponent() {
     layerVisibility,
     activeYear,
     activeYearData,
+    comparisonEnabled,
+    splitPosition,
+    comparisonLeftYearData,
+    comparisonRightYearData,
   } = useVolcano();
   const previousMountainIdRef = useRef<string | null>(null);
   const previousYearRef = useRef<string | null>(null);
@@ -66,6 +71,10 @@ export default function CesiumViewerComponent() {
   const [terrainProvider, setTerrainProvider] =
     useState<TerrainProvider | null>(null);
   const [orthoImageryProvider, setOrthoImageryProvider] =
+    useState<ImageryProvider | null>(null);
+  const [leftOrthoProvider, setLeftOrthoProvider] =
+    useState<ImageryProvider | null>(null);
+  const [rightOrthoProvider, setRightOrthoProvider] =
     useState<ImageryProvider | null>(null);
 
   // Track when the Cesium viewer is mounted
@@ -195,6 +204,58 @@ export default function CesiumViewerComponent() {
     };
   }, [activeYearData?.orthoUrl]);
 
+  // Load left ortho provider for comparison
+  useEffect(() => {
+    let cancelled = false;
+
+    if (comparisonEnabled && comparisonLeftYearData?.orthoUrl) {
+      TileMapServiceImageryProvider.fromUrl(comparisonLeftYearData.orthoUrl, {
+        fileExtension: "png",
+        maximumLevel: 17,
+        minimumLevel: 11,
+      }).then((provider) => {
+        if (!cancelled) setLeftOrthoProvider(provider);
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      setLeftOrthoProvider(null);
+    };
+  }, [comparisonEnabled, comparisonLeftYearData?.orthoUrl]);
+
+  // Load right ortho provider for comparison
+  useEffect(() => {
+    let cancelled = false;
+
+    if (comparisonEnabled && comparisonRightYearData?.orthoUrl) {
+      TileMapServiceImageryProvider.fromUrl(comparisonRightYearData.orthoUrl, {
+        fileExtension: "png",
+        maximumLevel: 17,
+        minimumLevel: 11,
+      }).then((provider) => {
+        if (!cancelled) setRightOrthoProvider(provider);
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      setRightOrthoProvider(null);
+    };
+  }, [comparisonEnabled, comparisonRightYearData?.orthoUrl]);
+
+  // Update scene split position
+  useEffect(() => {
+    const viewer = viewerRef.current?.cesiumElement;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    if (comparisonEnabled) {
+      viewer.scene.splitPosition = splitPosition;
+    } else {
+      viewer.scene.splitPosition = 0.5;
+    }
+  }, [comparisonEnabled, splitPosition]);
+
   // Update terrain provider based on visibility toggle
   useEffect(() => {
     const viewer = viewerRef.current?.cesiumElement;
@@ -221,7 +282,19 @@ export default function CesiumViewerComponent() {
       navigationHelpButton={false}
       fullscreenButton={false}
     >
-      {layerVisibility.ortho && orthoImageryProvider && (
+      {comparisonEnabled && layerVisibility.ortho && leftOrthoProvider && (
+        <ImageryLayer
+          imageryProvider={leftOrthoProvider}
+          splitDirection={SplitDirection.LEFT}
+        />
+      )}
+      {comparisonEnabled && layerVisibility.ortho && rightOrthoProvider && (
+        <ImageryLayer
+          imageryProvider={rightOrthoProvider}
+          splitDirection={SplitDirection.RIGHT}
+        />
+      )}
+      {!comparisonEnabled && layerVisibility.ortho && orthoImageryProvider && (
         <ImageryLayer imageryProvider={orthoImageryProvider} />
       )}
       {layerVisibility.tiles3d && activeYearData?.tilesetUrl && (

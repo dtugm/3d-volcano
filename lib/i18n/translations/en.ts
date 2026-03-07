@@ -20,6 +20,8 @@ export const en: Translations = {
     play: "Play",
     pause: "Pause",
     comparison: "Comparison",
+    leftYear: "Left",
+    rightYear: "Right",
   },
   displayMode: {
     title: "Display Mode",
