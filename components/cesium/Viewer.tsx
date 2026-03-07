@@ -1,5 +1,6 @@
 "use client";
 
+// @ts-expect-error - Cesium doesn't have proper types for the CSS import
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import {
@@ -11,11 +12,12 @@ import {
   ImageryProvider,
   Ion,
   Math as CesiumMath,
+  SplitDirection,
   TerrainProvider,
   TileMapServiceImageryProvider,
   Viewer as CesiumViewer,
 } from "cesium";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Cesium3DTileset,
   CesiumComponentRef,
@@ -51,22 +53,62 @@ const FLY_DURATION = 1.5; // seconds
 
 export default function CesiumViewerComponent() {
   const viewerRef = useRef<CesiumComponentRef<CesiumViewer>>(null);
-  const { activeMountain, activeMountainId, layerVisibility } = useVolcano();
+  const {
+    activeMountain,
+    activeMountainId,
+    layerVisibility,
+    activeYear,
+    activeYearData,
+    comparisonEnabled,
+    splitPosition,
+    comparisonLeftYearData,
+    comparisonRightYearData,
+  } = useVolcano();
   const previousMountainIdRef = useRef<string | null>(null);
+  const previousYearRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
+  const [viewerReady, setViewerReady] = useState(false);
   const [terrainProvider, setTerrainProvider] =
     useState<TerrainProvider | null>(null);
   const [orthoImageryProvider, setOrthoImageryProvider] =
     useState<ImageryProvider | null>(null);
+  const [leftOrthoProvider, setLeftOrthoProvider] =
+    useState<ImageryProvider | null>(null);
+  const [rightOrthoProvider, setRightOrthoProvider] =
+    useState<ImageryProvider | null>(null);
+
+  // Track when the Cesium viewer is mounted
+  const viewerRefCallback = useCallback(
+    (ref: CesiumComponentRef<CesiumViewer> | null) => {
+      (
+        viewerRef as React.MutableRefObject<CesiumComponentRef<CesiumViewer> | null>
+      ).current = ref;
+      if (ref?.cesiumElement) {
+        setViewerReady(true);
+      }
+    },
+    [],
+  );
 
   const handleTilesetReady = (tileset: Cesium3DTilesetType) => {
     const viewer = viewerRef.current?.cesiumElement;
     if (!viewer || viewer.isDestroyed()) return;
 
+    // Only fly camera if mountain changed, not just year
+    const mountainChanged =
+      previousMountainIdRef.current !== null &&
+      previousMountainIdRef.current !== activeMountainId;
+    const isYearOnlyChange =
+      !mountainChanged &&
+      previousYearRef.current !== null &&
+      previousYearRef.current !== activeYear;
+
+    // Skip camera flight for year-only changes
+    if (isYearOnlyChange) return;
+
     // Cancel any pending camera flights
     viewer.camera.cancelFlight();
 
-    // Use flyToBoundingSphere instead of zoomTo to avoid the updateTransform issue
     try {
       if (!tileset.isDestroyed() && tileset.boundingSphere) {
         const duration = isInitialLoadRef.current ? 0 : FLY_DURATION;
@@ -82,46 +124,50 @@ export default function CesiumViewerComponent() {
     }
   };
 
-  // Fly to the active mountain when it changes (only for mountains without tilesets)
+  // Fly to the active mountain on initial load and when mountain changes
   useEffect(() => {
-    // Skip if this is the initial mount or same mountain
-    if (
-      previousMountainIdRef.current === null ||
-      previousMountainIdRef.current === activeMountainId
-    ) {
-      previousMountainIdRef.current = activeMountainId;
-      return;
-    }
-
-    previousMountainIdRef.current = activeMountainId;
-
+    if (!viewerReady) return;
     const viewer = viewerRef.current?.cesiumElement;
     if (!viewer || !activeMountain) return;
 
-    // Only fly to coordinates if the mountain doesn't have a tileset
-    // (mountains with tilesets will trigger handleTilesetReady when loaded)
-    if (!activeMountain.tilesetUrl) {
-      viewer.camera.flyTo({
-        destination: Cartesian3.fromDegrees(
-          activeMountain.longitude,
-          activeMountain.latitude,
-          5000,
-        ),
-        orientation: {
-          heading: CesiumMath.toRadians(270),
-          pitch: CesiumMath.toRadians(-18),
-          roll: 0,
-        },
-      });
-    }
-  }, [activeMountain, activeMountainId]);
+    const isInitial = previousMountainIdRef.current === null;
+    const isSameMountain = previousMountainIdRef.current === activeMountainId;
 
-  // Load terrain provider when active mountain has terrain data
+    previousMountainIdRef.current = activeMountainId;
+
+    // Skip if same mountain (year-only change)
+    if (!isInitial && isSameMountain) return;
+
+    // For mountains with tilesets, handleTilesetReady handles camera
+    if (activeYearData?.tilesetUrl) return;
+
+    // Fly to mountain coordinates (instant on initial load)
+    viewer.camera.flyTo({
+      destination: Cartesian3.fromDegrees(
+        activeMountain.longitude + 0.04,
+        activeMountain.latitude,
+        5000,
+      ),
+      orientation: {
+        heading: CesiumMath.toRadians(270),
+        pitch: CesiumMath.toRadians(-45),
+        roll: 0,
+      },
+      duration: isInitial ? 0 : FLY_DURATION,
+    });
+  }, [viewerReady, activeMountain, activeMountainId, activeYearData]);
+
+  // Track year changes
+  useEffect(() => {
+    previousYearRef.current = activeYear;
+  }, [activeYear]);
+
+  // Load terrain provider when active year data has terrain
   useEffect(() => {
     let cancelled = false;
 
-    if (activeMountain?.terrainUrl) {
-      CesiumTerrainProvider.fromUrl(activeMountain.terrainUrl, {
+    if (activeYearData?.terrainUrl) {
+      CesiumTerrainProvider.fromUrl(activeYearData.terrainUrl, {
         requestVertexNormals: true,
       }).then((provider) => {
         if (!cancelled) {
@@ -134,14 +180,14 @@ export default function CesiumViewerComponent() {
       cancelled = true;
       setTerrainProvider(null);
     };
-  }, [activeMountain?.terrainUrl]);
+  }, [activeYearData?.terrainUrl]);
 
-  // Load ortho imagery provider when active mountain has ortho data
+  // Load ortho imagery provider when active year data has ortho
   useEffect(() => {
     let cancelled = false;
 
-    if (activeMountain?.orthoUrl) {
-      TileMapServiceImageryProvider.fromUrl(activeMountain.orthoUrl, {
+    if (activeYearData?.orthoUrl) {
+      TileMapServiceImageryProvider.fromUrl(activeYearData.orthoUrl, {
         fileExtension: "png",
         maximumLevel: 17,
         minimumLevel: 11,
@@ -156,7 +202,59 @@ export default function CesiumViewerComponent() {
       cancelled = true;
       setOrthoImageryProvider(null);
     };
-  }, [activeMountain?.orthoUrl]);
+  }, [activeYearData?.orthoUrl]);
+
+  // Load left ortho provider for comparison
+  useEffect(() => {
+    let cancelled = false;
+
+    if (comparisonEnabled && comparisonLeftYearData?.orthoUrl) {
+      TileMapServiceImageryProvider.fromUrl(comparisonLeftYearData.orthoUrl, {
+        fileExtension: "png",
+        maximumLevel: 17,
+        minimumLevel: 11,
+      }).then((provider) => {
+        if (!cancelled) setLeftOrthoProvider(provider);
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      setLeftOrthoProvider(null);
+    };
+  }, [comparisonEnabled, comparisonLeftYearData?.orthoUrl]);
+
+  // Load right ortho provider for comparison
+  useEffect(() => {
+    let cancelled = false;
+
+    if (comparisonEnabled && comparisonRightYearData?.orthoUrl) {
+      TileMapServiceImageryProvider.fromUrl(comparisonRightYearData.orthoUrl, {
+        fileExtension: "png",
+        maximumLevel: 17,
+        minimumLevel: 11,
+      }).then((provider) => {
+        if (!cancelled) setRightOrthoProvider(provider);
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      setRightOrthoProvider(null);
+    };
+  }, [comparisonEnabled, comparisonRightYearData?.orthoUrl]);
+
+  // Update scene split position
+  useEffect(() => {
+    const viewer = viewerRef.current?.cesiumElement;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    if (comparisonEnabled) {
+      viewer.scene.splitPosition = splitPosition;
+    } else {
+      viewer.scene.splitPosition = 0.5;
+    }
+  }, [comparisonEnabled, splitPosition]);
 
   // Update terrain provider based on visibility toggle
   useEffect(() => {
@@ -167,14 +265,13 @@ export default function CesiumViewerComponent() {
       viewer.scene.globe.terrainProvider = terrainProvider;
     } else {
       // Reset to default ellipsoid terrain (flat)
-      viewer.scene.globe.terrainProvider =
-        new EllipsoidTerrainProvider();
+      viewer.scene.globe.terrainProvider = new EllipsoidTerrainProvider();
     }
   }, [layerVisibility.terrain, terrainProvider]);
 
   return (
     <Viewer
-      ref={viewerRef}
+      ref={viewerRefCallback}
       full
       timeline={false}
       animation={false}
@@ -185,13 +282,25 @@ export default function CesiumViewerComponent() {
       navigationHelpButton={false}
       fullscreenButton={false}
     >
-      {layerVisibility.ortho && orthoImageryProvider && (
+      {comparisonEnabled && layerVisibility.ortho && leftOrthoProvider && (
+        <ImageryLayer
+          imageryProvider={leftOrthoProvider}
+          splitDirection={SplitDirection.LEFT}
+        />
+      )}
+      {comparisonEnabled && layerVisibility.ortho && rightOrthoProvider && (
+        <ImageryLayer
+          imageryProvider={rightOrthoProvider}
+          splitDirection={SplitDirection.RIGHT}
+        />
+      )}
+      {!comparisonEnabled && layerVisibility.ortho && orthoImageryProvider && (
         <ImageryLayer imageryProvider={orthoImageryProvider} />
       )}
-      {layerVisibility.tiles3d && activeMountain?.tilesetUrl && (
+      {layerVisibility.tiles3d && activeYearData?.tilesetUrl && (
         <Cesium3DTileset
-          key={activeMountainId}
-          url={activeMountain.tilesetUrl}
+          key={activeMountainId + activeYear}
+          url={activeYearData.tilesetUrl}
           onReady={handleTilesetReady}
         />
       )}

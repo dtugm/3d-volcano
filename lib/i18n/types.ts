@@ -23,6 +23,8 @@ export interface Translations {
     play: string;
     pause: string;
     comparison: string;
+    leftYear: string;
+    rightYear: string;
   };
   displayMode: {
     title: string;

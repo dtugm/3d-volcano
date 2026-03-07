@@ -20,6 +20,8 @@ export const id: Translations = {
     play: "Putar",
     pause: "Jeda",
     comparison: "Perbandingan",
+    leftYear: "Kiri",
+    rightYear: "Kanan",
   },
   displayMode: {
     title: "Mode Tampilan",
