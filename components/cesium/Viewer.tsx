@@ -1,6 +1,5 @@
 "use client";
 
-// @ts-expect-error - Cesium doesn't have proper types for the CSS import
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import {
