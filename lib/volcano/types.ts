@@ -23,15 +23,15 @@ export const MOUNTAINS: Mountain[] = [
     longitude: 115.51,
     elevation: 3031,
     series: 2,
-    years: ["2020", "2026"],
+    years: ["2017", "2020"],
     yearData: {
+      "2017": {
+        terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-agung/2017",
+        orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-agung/2017",
+      },
       "2020": {
         terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-agung/2020",
         orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-agung/2020",
-      },
-      "2026": {
-        terrainUrl: "",
-        orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-agung/2026",
       },
     },
   },
