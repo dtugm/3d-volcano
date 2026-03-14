@@ -45,6 +45,7 @@ const DisplayModeSection: React.FC = () => {
                 />
               }
               label={getModeLabel(mode.id)}
+              color={mode.color}
               isActive={layerVisibility[mode.id]}
               onClick={() => toggleLayer(mode.id)}
             />
