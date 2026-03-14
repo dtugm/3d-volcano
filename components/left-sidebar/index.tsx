@@ -9,8 +9,10 @@ import { PanelIcon } from "../icons";
 import DimensionSection from "./dimension";
 import DisplayModeSection from "./display-mode";
 import MountainList from "./mountain-list";
+import ResearchInfo from "./research-box";
 import SensorSection from "./sensor";
 import TimeSeriesSection from "./time-series";
+
 
 const STORAGE_KEY = "left-sidebar-collapsed";
 
@@ -52,10 +54,9 @@ const LeftSideBar = () => {
           fixed lg:relative inset-y-0 left-0 z-30 lg:z-90
           flex flex-col shrink-0 bg-background
           transition-transform duration-300 ease-in-out
-          ${
-            isCollapsed
-              ? "-translate-x-full lg:translate-x-0 lg:w-5"
-              : "translate-x-0 w-80 lg:w-80"
+          ${isCollapsed
+            ? "-translate-x-full lg:translate-x-0 lg:w-5"
+            : "translate-x-0 w-80 lg:w-80"
           }
           h-full
           border-r border-slate-200 dark:border-slate-800
@@ -86,6 +87,7 @@ const LeftSideBar = () => {
 
         {!isCollapsed && (
           <div className="flex flex-col flex-1 p-4 min-w-80 overflow-hidden animate-fade-in overflow-y-auto gap-4">
+            <ResearchInfo />
             <MountainList
               mountains={mountains}
               activeMountainId={activeMountainId}
