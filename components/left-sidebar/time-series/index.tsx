@@ -25,6 +25,7 @@ const TimeSeriesPlayer: React.FC<TimeSeriesPlayerProps> = ({ dates }) => {
   const { setActiveYear } = useVolcano();
   const [currentIndex, setCurrentIndex] = useState(dates.length - 1);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState(3);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const maxIndex = dates.length - 1;
@@ -36,7 +37,18 @@ const TimeSeriesPlayer: React.FC<TimeSeriesPlayerProps> = ({ dates }) => {
       setActiveYear(dates[currentIndex].date);
     }
   }, [currentIndex, dates, setActiveYear]);
+  useEffect(() => {
+    if (!isPlaying) return;
 
+    const countdown = setInterval(() => {
+      setRemainingSeconds((prev) => {
+        if (prev <= 1) return 3;
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdown);
+  }, [isPlaying]);
   const stopPlayback = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -121,6 +133,7 @@ const TimeSeriesPlayer: React.FC<TimeSeriesPlayerProps> = ({ dates }) => {
         onPlayPause={handlePlayPause}
         onSkipBack={handleSkipBack}
         onSkipForward={handleSkipForward}
+        remainingSeconds={remainingSeconds}
       />
     </div>
   );

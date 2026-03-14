@@ -16,10 +16,10 @@ export const id: Translations = {
   },
   timeSeries: {
     title: "Seri Waktu",
-    current: "Saat Ini",
+    current: "Timeline",
     play: "Putar",
     pause: "Jeda",
-    comparison: "Perbandingan",
+    comparison: "Swipe Comparison",
     leftYear: "Kiri",
     rightYear: "Kanan",
   },

@@ -29,11 +29,10 @@ const TimeSeriesSlider: React.FC<TimeSeriesSliderProps> = ({
         {dots.map((index) => (
           <div
             key={index}
-            className={`w-1.5 h-1.5 rounded-full transition-all ${
-              index === value
+            className={`w-1.5 h-1.5 rounded-full transition-all ${index === value
                 ? "bg-[#4285F4] scale-150"
                 : "bg-slate-300 dark:bg-slate-600"
-            }`}
+              }`}
           />
         ))}
       </div>

@@ -15,6 +15,7 @@ interface TimeSeriesControlsProps {
   canGoForward: boolean;
   playLabel: string;
   pauseLabel: string;
+  remainingSeconds?: number;
   onPlayPause: () => void;
   onSkipBack: () => void;
   onSkipForward: () => void;
@@ -29,6 +30,7 @@ const TimeSeriesControls: React.FC<TimeSeriesControlsProps> = ({
   onPlayPause,
   onSkipBack,
   onSkipForward,
+  remainingSeconds
 }) => {
   return (
     <div className="flex items-center gap-2">
@@ -46,7 +48,14 @@ const TimeSeriesControls: React.FC<TimeSeriesControlsProps> = ({
         {isPlaying ? (
           <>
             <PauseIcon className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">{pauseLabel}</span>
+            <span className="text-xs font-medium flex items-center gap-1">
+              {pauseLabel}
+              {remainingSeconds !== undefined && (
+                <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">
+                  {remainingSeconds}
+                </span>
+              )}
+            </span>
           </>
         ) : (
           <>
