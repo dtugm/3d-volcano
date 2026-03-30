@@ -20,6 +20,10 @@ export const en: Translations = {
     play: "Play",
     pause: "Pause",
     comparison: "Comparison",
+    comparisonModes: {
+      ortho: "Ortho",
+      terrain: "Terrain",
+    },
     leftYear: "Left",
     rightYear: "Right",
   },
