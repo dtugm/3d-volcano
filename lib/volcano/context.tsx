@@ -12,6 +12,7 @@ import {
 import { Mountain, MOUNTAINS, YearData } from "./types";
 
 export type LayerType = "terrain" | "ortho" | "tiles3d";
+export type ComparisonMode = "ortho" | "terrain";
 
 export interface LayerVisibility {
   terrain: boolean;
@@ -31,6 +32,8 @@ interface VolcanoContextValue {
   activeYearData: YearData | undefined;
   comparisonEnabled: boolean;
   setComparisonEnabled: (enabled: boolean) => void;
+  comparisonMode: ComparisonMode;
+  setComparisonMode: (mode: ComparisonMode) => void;
   comparisonLeftYear: string;
   setComparisonLeftYear: (year: string) => void;
   comparisonRightYear: string;
@@ -56,6 +59,7 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
     tiles3d: true,
   });
   const [comparisonEnabled, setComparisonEnabledState] = useState(false);
+  const [comparisonMode, setComparisonMode] = useState<ComparisonMode>("ortho");
   const [comparisonLeftYear, setComparisonLeftYear] = useState<string>("");
   const [comparisonRightYear, setComparisonRightYear] = useState<string>("");
   const [splitPosition, setSplitPosition] = useState(0.5);
@@ -71,6 +75,7 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
     }
     // Reset comparison state on mountain change
     setComparisonEnabledState(false);
+    setComparisonMode("ortho");
     setComparisonLeftYear("");
     setComparisonRightYear("");
     setSplitPosition(0.5);
@@ -126,6 +131,8 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
         activeYearData,
         comparisonEnabled,
         setComparisonEnabled,
+        comparisonMode,
+        setComparisonMode,
         comparisonLeftYear,
         setComparisonLeftYear,
         comparisonRightYear,
