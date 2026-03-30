@@ -23,6 +23,10 @@ export interface Translations {
     play: string;
     pause: string;
     comparison: string;
+    comparisonModes: {
+      ortho: string;
+      terrain: string;
+    };
     leftYear: string;
     rightYear: string;
   };

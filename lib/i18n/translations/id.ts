@@ -20,6 +20,10 @@ export const id: Translations = {
     play: "Putar",
     pause: "Jeda",
     comparison: "Swipe Comparison",
+    comparisonModes: {
+      ortho: "Ortho",
+      terrain: "Terrain",
+    },
     leftYear: "Kiri",
     rightYear: "Kanan",
   },
