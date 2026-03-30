@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { useTranslation } from "@/lib/i18n";
-import { useVolcano } from "@/lib/volcano";
+import { ComparisonMode, useVolcano } from "@/lib/volcano";
 
 import { CalendarIcon, GitCompareIcon } from "../../icons";
 import SectionHeader from "../../section-header";
@@ -153,6 +153,8 @@ const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
     setComparisonLeftYear,
     comparisonRightYear,
     setComparisonRightYear,
+    comparisonMode,
+    setComparisonMode,
   } = useVolcano();
 
   // Create a stable key based on dates array to reset player state when dates change
@@ -184,6 +186,24 @@ const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
             </span>
           }
         />
+
+        {comparisonEnabled && (
+          <div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
+            {(["ortho", "terrain"] as ComparisonMode[]).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setComparisonMode(mode)}
+                className={`flex-1 text-xs py-1.5 px-3 font-medium transition-colors ${
+                  comparisonMode === mode
+                    ? "bg-[#F4B942] text-slate-900"
+                    : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600"
+                }`}
+              >
+                {t.timeSeries.comparisonModes[mode]}
+              </button>
+            ))}
+          </div>
+        )}
 
         {comparisonEnabled && (
           <div className="flex gap-2">
