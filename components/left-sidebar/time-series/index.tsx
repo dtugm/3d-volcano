@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { useTranslation } from "@/lib/i18n";
-import { ComparisonMode, useVolcano } from "@/lib/volcano";
+import { ComparisonMode, formatTimeKey, useVolcano } from "@/lib/volcano";
 
 import { CalendarIcon, GitCompareIcon } from "../../icons";
 import SectionHeader from "../../section-header";
@@ -144,7 +144,7 @@ interface TimeSeriesSectionProps {
 }
 
 const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     activeMountain,
     comparisonEnabled,
@@ -218,7 +218,7 @@ const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
               >
                 {years.map((year) => (
                   <option key={year} value={year}>
-                    {year}
+                    {formatTimeKey(year, locale)}
                   </option>
                 ))}
               </select>
@@ -234,7 +234,7 @@ const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
               >
                 {years.map((year) => (
                   <option key={year} value={year}>
-                    {year}
+                    {formatTimeKey(year, locale)}
                   </option>
                 ))}
               </select>

@@ -2,7 +2,8 @@
 
 import React, { useCallback, useEffect, useRef } from "react";
 
-import { useVolcano } from "@/lib/volcano";
+import { useTranslation } from "@/lib/i18n";
+import { formatTimeKey, useVolcano } from "@/lib/volcano";
 
 export default function SplitSlider() {
   const {
@@ -12,6 +13,7 @@ export default function SplitSlider() {
     comparisonLeftYear,
     comparisonRightYear,
   } = useVolcano();
+  const { locale } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
 
@@ -52,13 +54,13 @@ export default function SplitSlider() {
         className="absolute top-4 pointer-events-none text-sm font-mono font-semibold bg-black/60 text-white px-2 py-1 rounded"
         style={{ left: `calc(${splitPosition * 100}% - 80px)` }}
       >
-        {comparisonLeftYear}
+        {formatTimeKey(comparisonLeftYear, locale)}
       </div>
       <div
         className="absolute top-4 pointer-events-none text-sm font-mono font-semibold bg-black/60 text-white px-2 py-1 rounded"
         style={{ left: `calc(${splitPosition * 100}% + 16px)` }}
       >
-        {comparisonRightYear}
+        {formatTimeKey(comparisonRightYear, locale)}
       </div>
 
       {/* Draggable divider */}

@@ -3,7 +3,8 @@
 import { useEffect, useMemo } from "react";
 
 import { useSidebar } from "@/lib/app/useSidebar";
-import { useVolcano } from "@/lib/volcano";
+import { useTranslation } from "@/lib/i18n";
+import { formatTimeKey, useVolcano } from "@/lib/volcano";
 
 import { PanelIcon } from "../icons";
 import DimensionSection from "./dimension";
@@ -20,6 +21,7 @@ const LeftSideBar = () => {
   const { mountains, activeMountainId, activeMountain, setActiveMountainId } =
     useVolcano();
   const { isCollapsed, toggleSidebar } = useSidebar();
+  const { locale } = useTranslation();
 
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
@@ -34,9 +36,9 @@ const LeftSideBar = () => {
     if (!activeMountain) return [];
     return activeMountain.years.map((year) => ({
       date: year,
-      label: year,
+      label: formatTimeKey(year, locale),
     }));
-  }, [activeMountain]);
+  }, [activeMountain, locale]);
 
   return (
     <>
