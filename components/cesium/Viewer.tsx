@@ -34,8 +34,6 @@ declare global {
 
 if (typeof window !== "undefined") {
   window.CESIUM_BASE_URL = "/cesium";
-
-  // Set up Cesium Ion token if available
   const token = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN;
   if (token) {
     Ion.defaultAccessToken = token;
