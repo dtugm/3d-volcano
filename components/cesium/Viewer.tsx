@@ -11,6 +11,7 @@ import {
   ImageryProvider,
   Ion,
   Math as CesiumMath,
+  OpenStreetMapImageryProvider,
   SplitDirection,
   TerrainProvider,
   TileMapServiceImageryProvider,
@@ -47,6 +48,10 @@ const DEFAULT_HEADING_PITCH_RANGE = new HeadingPitchRange(
 );
 
 const FLY_DURATION = 1.5; // seconds
+
+const osmImageryProvider = new OpenStreetMapImageryProvider({
+  url: "https://a.tile.openstreetmap.org/",
+});
 
 export default function CesiumViewerComponent() {
   const viewerRef = useRef<CesiumComponentRef<CesiumViewer>>(null);
@@ -279,6 +284,7 @@ export default function CesiumViewerComponent() {
       navigationHelpButton={false}
       fullscreenButton={false}
     >
+      <ImageryLayer imageryProvider={osmImageryProvider} />
       {comparisonEnabled && layerVisibility.ortho && leftOrthoProvider && (
         <ImageryLayer
           imageryProvider={leftOrthoProvider}
