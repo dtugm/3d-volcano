@@ -4,9 +4,10 @@ import { useEffect, useMemo } from "react";
 
 import { useSidebar } from "@/lib/app/useSidebar";
 import { useTranslation } from "@/lib/i18n";
-import { formatTimeKey, useVolcano } from "@/lib/volcano";
+import { type BasemapType, formatTimeKey, useVolcano } from "@/lib/volcano";
 
 import { PanelIcon } from "../icons";
+import SectionHeader from "../section-header";
 import DimensionSection from "./dimension";
 import DisplayModeSection from "./display-mode";
 import MountainList from "./mountain-list";
@@ -14,14 +15,19 @@ import ResearchInfo from "./research-box";
 import SensorSection from "./sensor";
 import TimeSeriesSection from "./time-series";
 
-
 const STORAGE_KEY = "left-sidebar-collapsed";
 
 const LeftSideBar = () => {
-  const { mountains, activeMountainId, activeMountain, setActiveMountainId } =
-    useVolcano();
+  const {
+    mountains,
+    activeMountainId,
+    activeMountain,
+    setActiveMountainId,
+    basemap,
+    setBasemap,
+  } = useVolcano();
   const { isCollapsed, toggleSidebar } = useSidebar();
-  const { locale } = useTranslation();
+  const { locale, t } = useTranslation();
 
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
@@ -56,9 +62,10 @@ const LeftSideBar = () => {
           fixed lg:relative inset-y-0 left-0 z-30 lg:z-90
           flex flex-col shrink-0 bg-background
           transition-transform duration-300 ease-in-out
-          ${isCollapsed
-            ? "-translate-x-full lg:translate-x-0 lg:w-5"
-            : "translate-x-0 w-80 lg:w-80"
+          ${
+            isCollapsed
+              ? "-translate-x-full lg:translate-x-0 lg:w-5"
+              : "translate-x-0 w-80 lg:w-80"
           }
           h-full
           border-r border-slate-200 dark:border-slate-800
@@ -90,6 +97,18 @@ const LeftSideBar = () => {
         {!isCollapsed && (
           <div className="flex flex-col flex-1 p-4 min-w-80 overflow-hidden animate-fade-in overflow-y-auto gap-4">
             <ResearchInfo />
+            <div>
+              <SectionHeader name={t.basemap.title} />
+              <select
+                value={basemap}
+                onChange={(e) => setBasemap(e.target.value as BasemapType)}
+                className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-2 py-1.5 mt-2"
+              >
+                <option value="osm">{t.basemap.osm}</option>
+                <option value="cesium">{t.basemap.cesium}</option>
+                <option value="esri">{t.basemap.esri}</option>
+              </select>
+            </div>
             <MountainList
               mountains={mountains}
               activeMountainId={activeMountainId}

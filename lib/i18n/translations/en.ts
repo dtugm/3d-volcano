@@ -41,6 +41,12 @@ export const en: Translations = {
     gas: "Gas",
     deformation: "Deformation",
   },
+  basemap: {
+    title: "Basemap",
+    osm: "OpenStreetMap",
+    cesium: "Cesium Ion",
+    esri: "ESRI World Imagery",
+  },
   dimension: {
     title: "Dimension",
     calculate: "Calculate",

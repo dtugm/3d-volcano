@@ -13,6 +13,7 @@ import { Mountain, MOUNTAINS, YearData } from "./types";
 
 export type LayerType = "terrain" | "ortho" | "tiles3d";
 export type ComparisonMode = "ortho" | "terrain";
+export type BasemapType = "osm" | "cesium" | "esri";
 
 export interface LayerVisibility {
   terrain: boolean;
@@ -42,6 +43,8 @@ interface VolcanoContextValue {
   setSplitPosition: (position: number) => void;
   comparisonLeftYearData: YearData | undefined;
   comparisonRightYearData: YearData | undefined;
+  basemap: BasemapType;
+  setBasemap: (basemap: BasemapType) => void;
 }
 
 const VolcanoContext = createContext<VolcanoContextValue | null>(null);
@@ -63,6 +66,7 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
   const [comparisonLeftYear, setComparisonLeftYear] = useState<string>("");
   const [comparisonRightYear, setComparisonRightYear] = useState<string>("");
   const [splitPosition, setSplitPosition] = useState(0.5);
+  const [basemap, setBasemap] = useState<BasemapType>("osm");
 
   const activeMountain = MOUNTAINS.find((m) => m.id === activeMountainId);
 
@@ -141,6 +145,8 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
         setSplitPosition,
         comparisonLeftYearData,
         comparisonRightYearData,
+        basemap,
+        setBasemap,
       }}
     >
       {children}

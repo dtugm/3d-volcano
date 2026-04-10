@@ -3,13 +3,16 @@
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import {
+  ArcGisMapServerImageryProvider,
   Cartesian3,
   Cesium3DTileset as Cesium3DTilesetType,
   CesiumTerrainProvider,
   EllipsoidTerrainProvider,
   HeadingPitchRange,
+  ImageryLayer as CesiumImageryLayer,
   ImageryProvider,
   Ion,
+  IonImageryProvider,
   Math as CesiumMath,
   OpenStreetMapImageryProvider,
   SplitDirection,
@@ -65,6 +68,7 @@ export default function CesiumViewerComponent() {
     splitPosition,
     comparisonLeftYearData,
     comparisonRightYearData,
+    basemap,
   } = useVolcano();
   const previousMountainIdRef = useRef<string | null>(null);
   const previousYearRef = useRef<string | null>(null);
@@ -78,6 +82,7 @@ export default function CesiumViewerComponent() {
     useState<ImageryProvider | null>(null);
   const [rightOrthoProvider, setRightOrthoProvider] =
     useState<ImageryProvider | null>(null);
+  const baseLayerRef = useRef<CesiumImageryLayer | null>(null);
 
   // Track when the Cesium viewer is mounted
   const viewerRefCallback = useCallback(
@@ -184,6 +189,46 @@ export default function CesiumViewerComponent() {
     };
   }, [activeYearData?.terrainUrl]);
 
+  // Swap base imagery layer imperatively to keep it at index 0
+  useEffect(() => {
+    const viewer = viewerRef.current?.cesiumElement;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    let cancelled = false;
+
+    const applyBaseLayer = (provider: ImageryProvider) => {
+      if (cancelled || viewer.isDestroyed()) return;
+      const layers = viewer.imageryLayers;
+      if (baseLayerRef.current) {
+        layers.remove(baseLayerRef.current, true);
+      }
+      const newLayer = layers.addImageryProvider(provider, 0);
+      baseLayerRef.current = newLayer;
+    };
+
+    switch (basemap) {
+      case "osm":
+        applyBaseLayer(osmImageryProvider);
+        break;
+      case "cesium":
+        IonImageryProvider.fromAssetId(2).then((provider) => {
+          applyBaseLayer(provider);
+        });
+        break;
+      case "esri":
+        ArcGisMapServerImageryProvider.fromUrl(
+          "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+        ).then((provider) => {
+          applyBaseLayer(provider);
+        });
+        break;
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [basemap, viewerReady]);
+
   // Load ortho imagery provider when active year data has ortho
   useEffect(() => {
     let cancelled = false;
@@ -283,8 +328,8 @@ export default function CesiumViewerComponent() {
       baseLayerPicker={false}
       navigationHelpButton={false}
       fullscreenButton={false}
+      baseLayer={false}
     >
-      <ImageryLayer imageryProvider={osmImageryProvider} />
       {comparisonEnabled && layerVisibility.ortho && leftOrthoProvider && (
         <ImageryLayer
           imageryProvider={leftOrthoProvider}

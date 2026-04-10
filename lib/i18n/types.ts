@@ -44,6 +44,12 @@ export interface Translations {
     gas: string;
     deformation: string;
   };
+  basemap: {
+    title: string;
+    osm: string;
+    cesium: string;
+    esri: string;
+  };
   dimension: {
     title: string;
     calculate: string;
