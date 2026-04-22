@@ -19,6 +19,7 @@
     "react-dom": "19.2.3",
     "recharts": "^3.7.0",
     "resium": "^1.19.3",
+    "swr": "^2.4.1",
     "three": "^0.183.2"
   },
   "devDependencies": {
