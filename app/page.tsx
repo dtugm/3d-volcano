@@ -5,7 +5,7 @@ import DualTerrainViewer from "@/components/cesium/DualTerrainViewerDynamic";
 import SplitSlider from "@/components/cesium/SplitSliderDynamic";
 import LeftSideBar from "@/components/left-sidebar";
 import { useVolcano } from "@/lib/volcano";
-// import RightSidebar from "@/components/right-sidebar";
+import RightSidebar from "@/components/right-sidebar";
 
 export default function Home() {
   const { comparisonEnabled, comparisonMode } = useVolcano();
@@ -19,7 +19,7 @@ export default function Home() {
         {showDualViewer ? <DualTerrainViewer /> : <CesiumViewer />}
         <SplitSlider />
       </main>
-      {/* <RightSidebar /> */}
+      <RightSidebar />
     </div>
   );
 }

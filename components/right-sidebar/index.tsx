@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 
 import { PanelIcon } from "../icons";
-import SensorMonitoring from "./sensor-monitoring";
+import AirQualityPanel from "./air-quality";
+import FirePanel from "./fire";
+import WeatherPanel from "./weather";
 
 const STORAGE_KEY = "right-sidebar-collapsed";
 
@@ -65,8 +67,10 @@ const RightSidebar = () => {
         />
       </button>
       {!isCollapsed && (
-        <div className="hidden lg:block flex-1 min-w-80 overflow-y-auto">
-          <SensorMonitoring />
+        <div className="hidden lg:block flex-1 min-w-80 overflow-y-auto p-5 space-y-6">
+          <WeatherPanel />
+          <AirQualityPanel />
+          <FirePanel />
         </div>
       )}
     </div>
