@@ -57,19 +57,34 @@ export interface Translations {
     depth: string;
     volumeDelta: string;
   };
-  sensorMonitoring: {
+  weather: {
     title: string;
     temperature: string;
     wind: string;
-    seismic: string;
-    gas: string;
-    deformation: string;
-    normal: string;
-    warning: string;
-    alert: string;
-    alerts: string;
-    warnings: string;
-    change24h: string;
+    humidity: string;
+  };
+  airQuality: {
+    title: string;
+    so2: string;
+    pm25: string;
+    pm10: string;
+    noStations: string;
+    station: string;
+    lastUpdated: string;
+    safe: string;
+    moderate: string;
+    unhealthy: string;
+  };
+  fire: {
+    title: string;
+    hotspots: string;
+    noHotspots: string;
+    brightness: string;
+    frp: string;
+    confidence: string;
+    satellite: string;
+    distance: string;
+    detected: string;
   };
 }
 
