@@ -2,6 +2,7 @@
   "name": "dt-volcano",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "copy-cesium": "cpx \"node_modules/cesium/Build/Cesium/**/*\" public/cesium",
     "dev": "pnpm run copy-cesium && next dev --turbopack",
