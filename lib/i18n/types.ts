@@ -11,6 +11,7 @@ export interface Translations {
   common: {
     loading: string;
     error: string;
+    height: string;
   };
   mountain: string;
   mountainCard: {

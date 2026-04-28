@@ -8,6 +8,7 @@ export const id: Translations = {
   common: {
     loading: "Memuat...",
     error: "Terjadi kesalahan",
+    height: "Ketinggian",
   },
   mountain: "Gunung",
   mountainCard: {

@@ -121,7 +121,7 @@ const LayerCard: React.FC<LayerCardProps> = ({ layer, t }) => {
           <span className="text-sm leading-none">{emoji}</span>
           <div>
             <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 tabular-nums">
-              {formatAltitude(layer.approxAltitudeM)}
+              {t.common.height} {formatAltitude(layer.approxAltitudeM)}
             </span>
             <span className="text-[10px] text-slate-400 ml-1.5 tabular-nums">
               {layer.pressureHpa} hPa
@@ -144,11 +144,14 @@ const LayerCard: React.FC<LayerCardProps> = ({ layer, t }) => {
             {layer.windSpeed.toFixed(1)} m/s
           </span>
           <span className="text-[10px] text-slate-400 tabular-nums">
-            {degToCompass(layer.windDirection)} ({Math.round(layer.windDirection)}°)
+            {degToCompass(layer.windDirection)} (
+            {Math.round(layer.windDirection)}°)
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-[10px] text-slate-400">{t.weather.humidity}</span>
+          <span className="text-[10px] text-slate-400">
+            {t.weather.humidity}
+          </span>
           <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300 tabular-nums">
             {Math.round(layer.humidity)}%
           </span>

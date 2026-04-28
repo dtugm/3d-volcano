@@ -8,6 +8,7 @@ export const en: Translations = {
   common: {
     loading: "Loading...",
     error: "An error occurred",
+    height: "Height",
   },
   mountain: "Mountain",
   mountainCard: {
