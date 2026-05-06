@@ -352,6 +352,13 @@ export default function CesiumViewerComponent() {
           onReady={handleTilesetReady}
         />
       )}
+      {layerVisibility.gaussianSplat && activeYearData?.gaussianSplatUrl && (
+        <Cesium3DTileset
+          key={activeMountainId + activeYear + "-splat"}
+          url={activeYearData.gaussianSplatUrl}
+          onReady={handleTilesetReady}
+        />
+      )}
     </Viewer>
   );
 }

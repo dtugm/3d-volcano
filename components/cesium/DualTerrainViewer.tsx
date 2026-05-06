@@ -14,7 +14,12 @@ import {
   Viewer as CesiumViewer,
 } from "cesium";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CesiumComponentRef, ImageryLayer, Viewer } from "resium";
+import {
+  Cesium3DTileset,
+  CesiumComponentRef,
+  ImageryLayer,
+  Viewer,
+} from "resium";
 
 import { useVolcano } from "@/lib/volcano";
 
@@ -246,6 +251,13 @@ export default function DualTerrainViewer() {
           {layerVisibility.ortho && leftOrthoProvider && (
             <ImageryLayer imageryProvider={leftOrthoProvider} />
           )}
+          {layerVisibility.gaussianSplat &&
+            comparisonLeftYearData?.gaussianSplatUrl && (
+              <Cesium3DTileset
+                key={comparisonLeftYearData.gaussianSplatUrl + "-splat-left"}
+                url={comparisonLeftYearData.gaussianSplatUrl}
+              />
+            )}
         </Viewer>
       </div>
 
@@ -260,6 +272,13 @@ export default function DualTerrainViewer() {
           {layerVisibility.ortho && rightOrthoProvider && (
             <ImageryLayer imageryProvider={rightOrthoProvider} />
           )}
+          {layerVisibility.gaussianSplat &&
+            comparisonRightYearData?.gaussianSplatUrl && (
+              <Cesium3DTileset
+                key={comparisonRightYearData.gaussianSplatUrl + "-splat-right"}
+                url={comparisonRightYearData.gaussianSplatUrl}
+              />
+            )}
         </Viewer>
       </div>
     </div>
