@@ -27,6 +27,7 @@ export interface Translations {
     comparisonModes: {
       ortho: string;
       terrain: string;
+      gaussianSplat: string;
     };
     leftYear: string;
     rightYear: string;
@@ -36,6 +37,7 @@ export interface Translations {
     terrain: string;
     ortho: string;
     tiles3d: string;
+    gaussianSplat: string;
   };
   sensor: {
     title: string;
