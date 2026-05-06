@@ -11,14 +11,15 @@ import {
 
 import { Mountain, MOUNTAINS, YearData } from "./types";
 
-export type LayerType = "terrain" | "ortho" | "tiles3d";
-export type ComparisonMode = "ortho" | "terrain";
+export type LayerType = "terrain" | "ortho" | "tiles3d" | "gaussianSplat";
+export type ComparisonMode = "ortho" | "terrain" | "gaussianSplat";
 export type BasemapType = "osm" | "cesium" | "esri";
 
 export interface LayerVisibility {
   terrain: boolean;
   ortho: boolean;
   tiles3d: boolean;
+  gaussianSplat: boolean;
 }
 
 interface VolcanoContextValue {
@@ -60,6 +61,7 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
     terrain: true,
     ortho: true,
     tiles3d: true,
+    gaussianSplat: false,
   });
   const [comparisonEnabled, setComparisonEnabledState] = useState(false);
   const [comparisonMode, setComparisonMode] = useState<ComparisonMode>("ortho");
@@ -77,6 +79,19 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
     if (mountain && mountain.years.length > 0) {
       setActiveYearState(mountain.years[mountain.years.length - 1]);
     }
+    // If the new mountain has no Gaussian Splat data, fall back to the
+    // default terrain+ortho display so the viewer doesn't go blank.
+    const hasSplat = !!mountain?.years.some(
+      (y) => !!mountain.yearData[y]?.gaussianSplatUrl,
+    );
+    if (!hasSplat) {
+      setLayerVisibility((prev) => ({
+        ...prev,
+        gaussianSplat: false,
+        terrain: prev.terrain || prev.gaussianSplat,
+        ortho: prev.ortho || prev.gaussianSplat,
+      }));
+    }
     // Reset comparison state on mountain change
     setComparisonEnabledState(false);
     setComparisonMode("ortho");
@@ -90,10 +105,21 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleLayer = useCallback((layer: LayerType) => {
-    setLayerVisibility((prev) => ({
-      ...prev,
-      [layer]: !prev[layer],
-    }));
+    setLayerVisibility((prev) => {
+      const next = { ...prev, [layer]: !prev[layer] };
+      // Gaussian Splat is mutually exclusive with terrain and ortho:
+      // when splat turns on, hide terrain and ortho; when terrain or ortho
+      // turn on while splat is on, hide splat. The user's display-mode
+      // sidebar buttons stay in sync with what the viewer actually shows.
+      if (layer === "gaussianSplat" && next.gaussianSplat) {
+        next.terrain = false;
+        next.ortho = false;
+      }
+      if ((layer === "terrain" || layer === "ortho") && next[layer]) {
+        next.gaussianSplat = false;
+      }
+      return next;
+    });
   }, []);
 
   const activeYearData = useMemo(() => {
