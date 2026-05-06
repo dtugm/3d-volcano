@@ -5,7 +5,7 @@ import React from "react";
 import { useTranslation } from "@/lib/i18n";
 import { LayerType, useVolcano } from "@/lib/volcano";
 
-import { LayersIcon, MapIcon } from "../../icons";
+import { BoxIcon, LayersIcon, MapIcon } from "../../icons";
 import SectionHeader from "../../section-header";
 import DisplayModeButton from "./display-mode-button";
 
@@ -18,6 +18,7 @@ interface DisplayModeConfig {
 const DISPLAY_MODES: DisplayModeConfig[] = [
   { id: "terrain", icon: LayersIcon, color: "#E8764B" },
   { id: "ortho", icon: MapIcon, color: "#4285F4" },
+  { id: "gaussianSplat", icon: BoxIcon, color: "#9333EA" },
 ];
 
 const DisplayModeSection: React.FC = () => {
