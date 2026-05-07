@@ -10,7 +10,9 @@ import RightSidebar from "@/components/right-sidebar";
 export default function Home() {
   const { comparisonEnabled, comparisonMode } = useVolcano();
 
-  const showDualViewer = comparisonEnabled && comparisonMode === "terrain";
+  const showDualViewer =
+    comparisonEnabled &&
+    (comparisonMode === "terrain" || comparisonMode === "gaussianSplat");
 
   return (
     <div className="flex flex-col lg:flex-row h-full w-full overflow-auto">

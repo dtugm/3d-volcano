@@ -165,6 +165,9 @@ const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
   }
 
   const years = activeMountain?.years ?? [];
+  const splatAvailable = years.some(
+    (y) => !!activeMountain?.yearData[y]?.gaussianSplatUrl,
+  );
 
   return (
     <section id="time-series" className="flex flex-col gap-2">
@@ -189,19 +192,23 @@ const TimeSeriesSection: React.FC<TimeSeriesSectionProps> = ({ dates }) => {
 
         {comparisonEnabled && (
           <div className="flex rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
-            {(["ortho", "terrain"] as ComparisonMode[]).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setComparisonMode(mode)}
-                className={`flex-1 text-xs py-1.5 px-3 font-medium transition-colors ${
-                  comparisonMode === mode
-                    ? "bg-[#F4B942] text-slate-900"
-                    : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600"
-                }`}
-              >
-                {t.timeSeries.comparisonModes[mode]}
-              </button>
-            ))}
+            {(["ortho", "terrain", "gaussianSplat"] as ComparisonMode[]).map((mode) => {
+              const disabled = mode === "gaussianSplat" && !splatAvailable;
+              return (
+                <button
+                  key={mode}
+                  onClick={() => !disabled && setComparisonMode(mode)}
+                  disabled={disabled}
+                  className={`flex-1 text-xs py-1.5 px-3 font-medium transition-colors ${
+                    comparisonMode === mode
+                      ? "bg-[#F4B942] text-slate-900"
+                      : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600"
+                  } ${disabled ? "opacity-40 cursor-not-allowed hover:bg-white dark:hover:bg-slate-700" : ""}`}
+                >
+                  {t.timeSeries.comparisonModes[mode]}
+                </button>
+              );
+            })}
           </div>
         )}
 

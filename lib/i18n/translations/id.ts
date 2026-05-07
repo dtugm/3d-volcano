@@ -24,6 +24,7 @@ export const id: Translations = {
     comparisonModes: {
       ortho: "Ortho",
       terrain: "Terrain",
+      gaussianSplat: "Splat",
     },
     leftYear: "Kiri",
     rightYear: "Kanan",
@@ -33,6 +34,7 @@ export const id: Translations = {
     terrain: "Terrain",
     ortho: "Ortho",
     tiles3d: "3D Tiles",
+    gaussianSplat: "Gaussian Splat",
   },
   sensor: {
     title: "Sensor",

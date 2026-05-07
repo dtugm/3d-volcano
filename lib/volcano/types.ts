@@ -2,6 +2,7 @@ export interface YearData {
   tilesetUrl?: string;
   terrainUrl?: string;
   orthoUrl?: string;
+  gaussianSplatUrl?: string;
 }
 
 export interface Mountain {
@@ -28,6 +29,8 @@ export const MOUNTAINS: Mountain[] = [
       "2017": {
         terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-agung/2017",
         orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-agung/2017",
+        gaussianSplatUrl:
+          "https://bucket.dt-volcano.geo-ai.id/GaussianSplat/gunung-agung/2017_ver_1/tileset.json",
       },
       "2017-10": {
         terrainUrl:
@@ -46,10 +49,14 @@ export const MOUNTAINS: Mountain[] = [
           "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-agung/2019_07",
         orthoUrl:
           "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-agung/2019_07",
+        gaussianSplatUrl:
+          "https://bucket.dt-volcano.geo-ai.id/GaussianSplat/gunung-agung/2019/tileset.json",
       },
       "2020": {
         terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-agung/2020",
         orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-agung/2020",
+        gaussianSplatUrl:
+          "https://bucket.dt-volcano.geo-ai.id/GaussianSplat/gunung-agung/2020/tileset.json",
       },
     },
   },
