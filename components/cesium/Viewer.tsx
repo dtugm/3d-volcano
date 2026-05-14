@@ -28,6 +28,8 @@ import {
   Viewer,
 } from "resium";
 
+import SimSourcePicker from "@/components/lahar/SimSourcePicker";
+import { useLaharData } from "@/lib/lahar";
 import { useVolcano } from "@/lib/volcano";
 
 declare global {
@@ -69,7 +71,9 @@ export default function CesiumViewerComponent() {
     comparisonLeftYearData,
     comparisonRightYearData,
     basemap,
+    simulationMode,
   } = useVolcano();
+  const { data: laharData } = useLaharData(activeYearData?.laharData);
   const previousMountainIdRef = useRef<string | null>(null);
   const previousYearRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
@@ -359,6 +363,12 @@ export default function CesiumViewerComponent() {
           onReady={handleTilesetReady}
         />
       )}
+      {simulationMode !== "off" && laharData ? (
+        <SimSourcePicker
+          viewer={viewerRef.current?.cesiumElement ?? null}
+          data={laharData}
+        />
+      ) : null}
     </Viewer>
   );
 }
