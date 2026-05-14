@@ -28,6 +28,7 @@ import {
   Viewer,
 } from "resium";
 
+import LaharzEnvelope from "@/components/lahar/LaharzEnvelope";
 import SimDepthRenderer from "@/components/lahar/SimDepthRenderer";
 import SimParticleRenderer from "@/components/lahar/SimParticleRenderer";
 import SimSourcePicker from "@/components/lahar/SimSourcePicker";
@@ -77,6 +78,8 @@ export default function CesiumViewerComponent() {
     basemap,
     simulationMode,
     materialProfile,
+    selectedLSP,
+    volumeInput,
   } = useVolcano();
   const { data: laharData } = useLaharData(activeYearData?.laharData);
   const materialProfileObj = getProfile(materialProfile);
@@ -398,6 +401,14 @@ export default function CesiumViewerComponent() {
           meta={laharData.heightmapMeta}
           snapshot={sim.snapshot}
           rgb={materialProfileObj.color}
+        />
+      ) : null}
+      {simulationMode !== "off" && selectedLSP ? (
+        <LaharzEnvelope
+          viewer={viewerRef.current?.cesiumElement ?? null}
+          origin={selectedLSP}
+          volume={volumeInput}
+          profile={materialProfileObj}
         />
       ) : null}
     </Viewer>

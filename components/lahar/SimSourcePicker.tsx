@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Cartesian2,
   Cartographic,
   Math as CesiumMath,
   ScreenSpaceEventHandler,
@@ -21,13 +22,13 @@ interface Props {
 
 export default function SimSourcePicker({ viewer, data }: Props) {
   const { simulationMode, setSelectedLSP, setSimStatus } = useVolcano();
-  const t = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!viewer || !data || simulationMode === "off") return;
     const handler = new ScreenSpaceEventHandler(viewer.canvas);
 
-    handler.setInputAction((evt: { position: { x: number; y: number } }) => {
+    handler.setInputAction((evt: { position: Cartesian2 }) => {
       const ray = viewer.camera.getPickRay(evt.position);
       if (!ray) return;
       const cart = viewer.scene.globe.pick(ray, viewer.scene);
