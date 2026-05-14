@@ -75,6 +75,16 @@ export const MOUNTAINS: Mountain[] = [
       "2014": {
         terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-kelud/2014",
         orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-kelud/2014",
+        laharData: {
+          baseUrl: "/lahar-test-data/gunung-kelud/2014",
+          mainstem: "mainstem.geojson",
+          branches: "branches.geojson",
+          deposition: "deposition.geojson",
+          hazardCone: "hazardCone.geojson",
+          lspCandidates: "lspCandidates.geojson",
+          heightmap: "heightmap.png",
+          heightmapMeta: "heightmap.json",
+        },
       },
       "2026": {
         terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-kelud/2026",
