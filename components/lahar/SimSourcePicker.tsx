@@ -53,6 +53,7 @@ export default function SimSourcePicker({ viewer, data }: Props) {
           outside_stream: t.simulation.rejection.outsideStream,
           below_hazard_cone: t.simulation.rejection.belowHazardCone,
           not_in_deposition: t.simulation.rejection.notInDeposition,
+          not_at_junction: t.simulation.rejection.notAtJunction,
         } as const;
         console.warn("[LSP click rejected]", result.reason && msgMap[result.reason]);
         setSimStatus("error");

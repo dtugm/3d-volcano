@@ -60,6 +60,8 @@ export const en: Translations = {
       outsideStream: "Click is outside any lahar stream",
       belowHazardCone: "Click is outside the proximal hazard zone",
       notInDeposition: "Click is outside the deposition area",
+      notAtJunction:
+        "Click is not near any precomputed lahar starting point (junction)",
     },
     controls: { play: "Play", pause: "Pause", reset: "Reset" },
     stats: { maxDepth: "Max depth", wettedCells: "Wetted cells", simTime: "Sim time" },

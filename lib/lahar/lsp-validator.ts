@@ -82,5 +82,5 @@ export function validateLSPClick(
   if (candidate && bestCandKm * 1000 <= 150) {
     return { ok: true, snapped: { lng: candidate.lng, lat: candidate.lat }, candidate };
   }
-  return { ok: true, snapped };
+  return { ok: false, snapped, reason: "not_at_junction" };
 }

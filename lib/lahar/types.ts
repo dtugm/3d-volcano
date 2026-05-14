@@ -73,7 +73,8 @@ export type SimStatus = "idle" | "running" | "paused" | "done" | "error";
 export type LSPRejection =
   | "outside_stream"
   | "below_hazard_cone"
-  | "not_in_deposition";
+  | "not_in_deposition"
+  | "not_at_junction";
 
 export interface LSPValidationResult {
   ok: boolean;

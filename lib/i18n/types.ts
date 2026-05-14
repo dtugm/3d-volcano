@@ -63,6 +63,7 @@ export interface Translations {
       outsideStream: string;
       belowHazardCone: string;
       notInDeposition: string;
+      notAtJunction: string;
     };
     controls: { play: string; pause: string; reset: string };
     stats: { maxDepth: string; wettedCells: string; simTime: string };

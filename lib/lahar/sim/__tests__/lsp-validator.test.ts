@@ -82,4 +82,15 @@ describe("validateLSPClick", () => {
     expect(r.ok).toBe(true);
     expect(r.candidate?.lspId).toBe("lsp-1");
   });
+
+  it("rejects when no LSP candidate (junction) is within 150m", () => {
+    const dataNoCands = { ...data, lspCandidates: [] };
+    const r = validateLSPClick(
+      { lng: 110.001, lat: -7.94 },
+      dataNoCands,
+      { snapToleranceM: 30 },
+    );
+    expect(r.ok).toBe(false);
+    expect(r.reason).toBe("not_at_junction");
+  });
 });

@@ -60,6 +60,8 @@ export const id: Translations = {
       outsideStream: "Klik di luar aliran lahar",
       belowHazardCone: "Klik di luar zona bahaya proksimal",
       notInDeposition: "Klik di luar area deposisi",
+      notAtJunction:
+        "Klik tidak dekat dengan titik awal lahar (junction) terdekat",
     },
     controls: { play: "Mulai", pause: "Jeda", reset: "Reset" },
     stats: { maxDepth: "Kedalaman maks", wettedCells: "Sel terendam", simTime: "Waktu simulasi" },
