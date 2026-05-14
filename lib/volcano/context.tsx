@@ -9,6 +9,14 @@ import {
   useState,
 } from "react";
 
+import type {
+  LSPCandidate,
+  MaterialProfileId,
+  SimStatus,
+  SimulationMode,
+  VolumeTriple,
+} from "@/lib/lahar/types";
+
 import { Mountain, MOUNTAINS, YearData } from "./types";
 
 export type LayerType = "terrain" | "ortho" | "tiles3d" | "gaussianSplat";
@@ -46,6 +54,16 @@ interface VolcanoContextValue {
   comparisonRightYearData: YearData | undefined;
   basemap: BasemapType;
   setBasemap: (basemap: BasemapType) => void;
+  simulationMode: SimulationMode;
+  setSimulationMode: (mode: SimulationMode) => void;
+  materialProfile: MaterialProfileId;
+  setMaterialProfile: (id: MaterialProfileId) => void;
+  selectedLSP: { lng: number; lat: number; candidate?: LSPCandidate } | null;
+  setSelectedLSP: (lsp: { lng: number; lat: number; candidate?: LSPCandidate } | null) => void;
+  volumeInput: VolumeTriple;
+  setVolumeInput: (v: VolumeTriple) => void;
+  simStatus: SimStatus;
+  setSimStatus: (s: SimStatus) => void;
 }
 
 const VolcanoContext = createContext<VolcanoContextValue | null>(null);
@@ -69,6 +87,29 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
   const [comparisonRightYear, setComparisonRightYear] = useState<string>("");
   const [splitPosition, setSplitPosition] = useState(0.5);
   const [basemap, setBasemap] = useState<BasemapType>("osm");
+  const [simulationMode, setSimulationModeState] = useState<SimulationMode>("off");
+  const [materialProfile, setMaterialProfile] = useState<MaterialProfileId>("laharWet");
+  const [selectedLSP, setSelectedLSP] = useState<{
+    lng: number;
+    lat: number;
+    candidate?: LSPCandidate;
+  } | null>(null);
+  const [volumeInput, setVolumeInput] = useState<VolumeTriple>({
+    min: 5000,
+    likely: 10000,
+    max: 20000,
+  });
+  const [simStatus, setSimStatus] = useState<SimStatus>("idle");
+
+  const setSimulationMode = useCallback((mode: SimulationMode) => {
+    setSimulationModeState(mode);
+    if (mode !== "off") {
+      setComparisonEnabledState(false);
+      setLayerVisibility((prev) => ({ ...prev, gaussianSplat: false }));
+    }
+    setSelectedLSP(null);
+    setSimStatus("idle");
+  }, []);
 
   const activeMountain = MOUNTAINS.find((m) => m.id === activeMountainId);
 
@@ -173,6 +214,16 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
         comparisonRightYearData,
         basemap,
         setBasemap,
+        simulationMode,
+        setSimulationMode,
+        materialProfile,
+        setMaterialProfile,
+        selectedLSP,
+        setSelectedLSP,
+        volumeInput,
+        setVolumeInput,
+        simStatus,
+        setSimStatus,
       }}
     >
       {children}
