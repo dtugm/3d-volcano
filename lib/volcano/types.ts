@@ -1,8 +1,11 @@
+import type { LaharDataRef } from "@/lib/lahar/types";
+
 export interface YearData {
   tilesetUrl?: string;
   terrainUrl?: string;
   orthoUrl?: string;
   gaussianSplatUrl?: string;
+  laharData?: LaharDataRef;
 }
 
 export interface Mountain {
