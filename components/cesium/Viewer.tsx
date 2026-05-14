@@ -28,8 +28,11 @@ import {
   Viewer,
 } from "resium";
 
+import SimDepthRenderer from "@/components/lahar/SimDepthRenderer";
 import SimSourcePicker from "@/components/lahar/SimSourcePicker";
 import { useLaharData } from "@/lib/lahar";
+import { useSimEngine } from "@/lib/lahar/hooks/use-sim-engine";
+import { getProfile } from "@/lib/lahar/materials";
 import { useVolcano } from "@/lib/volcano";
 
 declare global {
@@ -72,8 +75,19 @@ export default function CesiumViewerComponent() {
     comparisonRightYearData,
     basemap,
     simulationMode,
+    materialProfile,
   } = useVolcano();
   const { data: laharData } = useLaharData(activeYearData?.laharData);
+  const materialProfileObj = getProfile(materialProfile);
+  const heightmapUrl = activeYearData?.laharData
+    ? `${activeYearData.laharData.baseUrl}/${activeYearData.laharData.heightmap}`
+    : undefined;
+  const sim = useSimEngine({
+    heightmapUrl,
+    heightmapMeta: laharData?.heightmapMeta,
+    profileId: materialProfile,
+    enabled: simulationMode !== "off",
+  });
   const previousMountainIdRef = useRef<string | null>(null);
   const previousYearRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
@@ -367,6 +381,14 @@ export default function CesiumViewerComponent() {
         <SimSourcePicker
           viewer={viewerRef.current?.cesiumElement ?? null}
           data={laharData}
+        />
+      ) : null}
+      {simulationMode === "lahar" && laharData ? (
+        <SimDepthRenderer
+          viewer={viewerRef.current?.cesiumElement ?? null}
+          bbox={laharData.heightmapMeta.bbox}
+          snapshot={sim.snapshot}
+          rgb={materialProfileObj.color}
         />
       ) : null}
     </Viewer>
