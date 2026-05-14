@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getProfile, MATERIAL_PROFILES, routeSolver } from "@/lib/lahar/materials";
+import { getProfile, MATERIAL_PROFILES, profilesByKind, routeSolver } from "@/lib/lahar/materials";
 
 describe("MATERIAL_PROFILES", () => {
   it("has all four profiles", () => {
@@ -31,5 +31,14 @@ describe("MATERIAL_PROFILES", () => {
   it("yield strength is zero for wet lahar and positive for lava", () => {
     expect(getProfile("laharWet").yieldStrength).toBeLessThanOrEqual(50);
     expect(getProfile("lavaAndesitic").yieldStrength).toBeGreaterThan(500);
+  });
+
+  it("profilesByKind filters profiles by kind", () => {
+    const lahars = profilesByKind("lahar");
+    const lavas = profilesByKind("lava");
+    expect(lahars).toHaveLength(2);
+    expect(lavas).toHaveLength(2);
+    expect(lahars.every((p) => p.kind === "lahar")).toBe(true);
+    expect(lavas.every((p) => p.kind === "lava")).toBe(true);
   });
 });
