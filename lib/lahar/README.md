@@ -2,6 +2,21 @@
 
 Interactive flow simulation for the 3D Volcano Digital Twin. Click a Lahar Starting Point on the globe, pick a material profile and a triple-volume, watch a physics-based animation propagate downstream alongside a static LAHARZ empirical envelope.
 
+## TL;DR — how to run it
+
+```bash
+pnpm install
+pnpm dev                # http://localhost:3000
+```
+
+1. Pick **Gunung Kelud** in the left sidebar (year 2014 by default).
+2. In the new **Lahar/Lava Simulation** section, choose mode = **Lahar** (or Lava).
+3. Pick a material profile and edit the volume triple if you want.
+4. Click on a stream on the globe — it snaps to the nearest precomputed Lahar Starting Point.
+5. Press **Play**.
+
+A full end-user walkthrough lives in the top-level [`README.md`](../../README.md#using-the-lahar--lava-flow-simulation).
+
 ## Pipeline
 
 ```
