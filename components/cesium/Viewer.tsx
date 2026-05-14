@@ -29,6 +29,7 @@ import {
 } from "resium";
 
 import SimDepthRenderer from "@/components/lahar/SimDepthRenderer";
+import SimParticleRenderer from "@/components/lahar/SimParticleRenderer";
 import SimSourcePicker from "@/components/lahar/SimSourcePicker";
 import { useLaharData } from "@/lib/lahar";
 import { useSimEngine } from "@/lib/lahar/hooks/use-sim-engine";
@@ -387,6 +388,14 @@ export default function CesiumViewerComponent() {
         <SimDepthRenderer
           viewer={viewerRef.current?.cesiumElement ?? null}
           bbox={laharData.heightmapMeta.bbox}
+          snapshot={sim.snapshot}
+          rgb={materialProfileObj.color}
+        />
+      ) : null}
+      {simulationMode === "lava" && laharData ? (
+        <SimParticleRenderer
+          viewer={viewerRef.current?.cesiumElement ?? null}
+          meta={laharData.heightmapMeta}
           snapshot={sim.snapshot}
           rgb={materialProfileObj.color}
         />
