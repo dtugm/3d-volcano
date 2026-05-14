@@ -1,0 +1,13 @@
+export const G = 9.81;             // m/s² gravity
+export const CFL = 0.5;            // Courant safety factor for SWE
+export const H_MIN = 1e-4;         // minimum depth (m) for momentum
+export const MAX_DT = 2.0;         // s
+export const WATER_DEPTH_SCALE = 1.0;
+export const MAX_DEPTH = 20.0;     // m, clamp
+export const DEPTH_INCREMENT = 0.01;
+export const PARTICLES_PER_TICK = 5;
+export const MAX_PARTICLE_AGE = 500;
+export const MAX_PARTICLES = 5000;
+export const SLOPE_SENSITIVITY = 5.0;
+export const SPREAD_PROB = 0.3;
+export const SNAPSHOT_INTERVAL = 5;
