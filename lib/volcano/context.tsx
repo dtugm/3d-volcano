@@ -197,6 +197,7 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
         setComparisonLeftYear(years[0]);
         setComparisonRightYear(years[years.length - 1]);
         setSplitPosition(0.5);
+        setSimulationModeState("off");
       }
     },
     [activeMountain],
