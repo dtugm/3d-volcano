@@ -47,6 +47,26 @@ export interface Translations {
     gas: string;
     deformation: string;
   };
+  simulation: {
+    title: string;
+    mode: { off: string; lahar: string; lava: string };
+    material: string;
+    materialOptions: {
+      laharWet: string;
+      laharDry: string;
+      lavaBasaltic: string;
+      lavaAndesitic: string;
+    };
+    volume: { min: string; likely: string; max: string; unit: string };
+    promptClick: string;
+    rejection: {
+      outsideStream: string;
+      belowHazardCone: string;
+      notInDeposition: string;
+    };
+    controls: { play: string; pause: string; reset: string };
+    stats: { maxDepth: string; wettedCells: string; simTime: string };
+  };
   basemap: {
     title: string;
     osm: string;
