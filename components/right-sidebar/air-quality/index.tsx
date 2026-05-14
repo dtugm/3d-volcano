@@ -2,8 +2,8 @@
 
 import { AirVentIcon, RefreshCwIcon } from "@/components/icons";
 import SectionHeader from "@/components/section-header";
-import { useTranslation } from "@/lib/i18n";
 import { useAirQuality } from "@/lib/hooks/use-air-quality";
+import { useTranslation } from "@/lib/i18n";
 
 type AqLevel = "safe" | "moderate" | "unhealthy";
 

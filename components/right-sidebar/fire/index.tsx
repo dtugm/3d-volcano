@@ -7,8 +7,8 @@ import {
   RefreshCwIcon,
 } from "@/components/icons";
 import SectionHeader from "@/components/section-header";
-import { useTranslation } from "@/lib/i18n";
 import { useFire } from "@/lib/hooks/use-fire";
+import { useTranslation } from "@/lib/i18n";
 
 const FirePanel = () => {
   const { t } = useTranslation();
