@@ -10,6 +10,7 @@ import { PanelIcon } from "../icons";
 import SectionHeader from "../section-header";
 import DimensionSection from "./dimension";
 import DisplayModeSection from "./display-mode";
+import LaharSimSection from "./lahar-sim";
 import MountainList from "./mountain-list";
 import ResearchInfo from "./research-box";
 import SensorSection from "./sensor";
@@ -116,6 +117,7 @@ const LeftSideBar = () => {
             />
             <DisplayModeSection />
             <TimeSeriesSection dates={timeSeriesDates} />
+            <LaharSimSection />
             <div className="pointer-events-none opacity-50 flex flex-col gap-4">
               <SensorSection />
               <DimensionSection />
