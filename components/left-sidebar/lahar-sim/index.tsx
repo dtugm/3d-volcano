@@ -5,7 +5,6 @@ import { useEffect, useMemo } from "react";
 import SectionHeader from "@/components/section-header";
 import { useTranslation } from "@/lib/i18n/useTranslation";
 import { useLaharData } from "@/lib/lahar/hooks/use-lahar-data";
-import { useSimEngine } from "@/lib/lahar/hooks/use-sim-engine";
 import { TerrainGrid } from "@/lib/lahar/terrain/grid";
 import { useVolcano } from "@/lib/volcano";
 
@@ -24,23 +23,18 @@ export default function LaharSimSection() {
     volumeInput,
     setVolumeInput,
     activeYearData,
+    simSnapshot,
+    simReady,
+    simRunning,
+    setSimRunning,
+    simSetSource,
+    simReset,
   } = useVolcano();
 
   const { data: laharData } = useLaharData(activeYearData?.laharData);
 
-  const heightmapUrl = activeYearData?.laharData
-    ? `${activeYearData.laharData.baseUrl}/${activeYearData.laharData.heightmap}`
-    : undefined;
-
-  const sim = useSimEngine({
-    heightmapUrl,
-    heightmapMeta: laharData?.heightmapMeta,
-    profileId: materialProfile,
-    enabled: simulationMode !== "off",
-  });
-
   useEffect(() => {
-    if (!selectedLSP || !laharData) return;
+    if (!selectedLSP || !laharData || !simReady) return;
     const grid = new TerrainGrid({
       heights: new Float32Array(
         laharData.heightmapMeta.width * laharData.heightmapMeta.height,
@@ -51,26 +45,18 @@ export default function LaharSimSection() {
       bbox: laharData.heightmapMeta.bbox,
     });
     const { r, c } = grid.lngLatToRc(selectedLSP.lng, selectedLSP.lat);
-    sim.setSource(r, c);
+    simSetSource(r, c);
     if (selectedLSP.candidate) setVolumeInput(selectedLSP.candidate.slv);
-  // `sim` methods are stable across renders by construction (close over workerRef)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLSP, laharData, sim.ready, setVolumeInput]);
-
-  useEffect(() => {
-    sim.setProfile(materialProfile);
-  // `sim` methods are stable across renders by construction (close over workerRef)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [materialProfile, sim.ready]);
+  }, [selectedLSP, laharData, simReady, simSetSource, setVolumeInput]);
 
   const stats = useMemo(() => {
-    if (!sim.snapshot) return null;
+    if (!simSnapshot) return null;
     return {
-      maxDepth: sim.snapshot.maxDepth,
-      wettedCells: sim.snapshot.wettedCells,
-      timeS: sim.snapshot.timeS,
+      maxDepth: simSnapshot.maxDepth,
+      wettedCells: simSnapshot.wettedCells,
+      timeS: simSnapshot.timeS,
     };
-  }, [sim.snapshot]);
+  }, [simSnapshot]);
 
   if (!activeYearData?.laharData) return null;
 
@@ -108,10 +94,10 @@ export default function LaharSimSection() {
               </p>
             ) : null}
             <SimControls
-              running={sim.running}
-              onPlay={() => sim.setRunning(true)}
-              onPause={() => sim.setRunning(false)}
-              onReset={sim.reset}
+              running={simRunning}
+              onPlay={() => setSimRunning(true)}
+              onPause={() => setSimRunning(false)}
+              onReset={simReset}
               stats={stats}
             />
           </>

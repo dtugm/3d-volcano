@@ -9,9 +9,12 @@ import {
   useState,
 } from "react";
 
+import { useLaharData } from "@/lib/lahar/hooks/use-lahar-data";
+import { useSimEngine } from "@/lib/lahar/hooks/use-sim-engine";
 import type {
   LSPCandidate,
   MaterialProfileId,
+  SimSnapshot,
   SimStatus,
   SimulationMode,
   VolumeTriple,
@@ -64,6 +67,12 @@ interface VolcanoContextValue {
   setVolumeInput: (v: VolumeTriple) => void;
   simStatus: SimStatus;
   setSimStatus: (s: SimStatus) => void;
+  simSnapshot: SimSnapshot | null;
+  simReady: boolean;
+  simRunning: boolean;
+  setSimRunning: (running: boolean) => void;
+  simSetSource: (r: number, c: number) => void;
+  simReset: () => void;
 }
 
 const VolcanoContext = createContext<VolcanoContextValue | null>(null);
@@ -167,6 +176,19 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
     return activeMountain?.yearData[activeYear];
   }, [activeMountain, activeYear]);
 
+  const { data: laharData } = useLaharData(activeYearData?.laharData);
+
+  const heightmapUrl = activeYearData?.laharData
+    ? `${activeYearData.laharData.baseUrl}/${activeYearData.laharData.heightmap}`
+    : undefined;
+
+  const sim = useSimEngine({
+    heightmapUrl,
+    heightmapMeta: laharData?.heightmapMeta,
+    profileId: materialProfile,
+    enabled: simulationMode !== "off",
+  });
+
   const setComparisonEnabled = useCallback(
     (enabled: boolean) => {
       setComparisonEnabledState(enabled);
@@ -224,6 +246,12 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
         setVolumeInput,
         simStatus,
         setSimStatus,
+        simSnapshot: sim.snapshot,
+        simReady: sim.ready,
+        simRunning: sim.running,
+        setSimRunning: sim.setRunning,
+        simSetSource: sim.setSource,
+        simReset: sim.reset,
       }}
     >
       {children}
