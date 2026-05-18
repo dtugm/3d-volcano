@@ -62,10 +62,9 @@ const LeftSideBar = () => {
           fixed lg:relative inset-y-0 left-0 z-30 lg:z-90
           flex flex-col shrink-0 bg-background
           transition-transform duration-300 ease-in-out
-          ${
-            isCollapsed
-              ? "-translate-x-full lg:translate-x-0 lg:w-5"
-              : "translate-x-0 w-80 lg:w-80"
+          ${isCollapsed
+            ? "-translate-x-full lg:translate-x-0 lg:w-5"
+            : "translate-x-0 w-80 lg:w-80"
           }
           h-full
           border-r border-slate-200 dark:border-slate-800
@@ -116,9 +115,9 @@ const LeftSideBar = () => {
             />
             <DisplayModeSection />
             <TimeSeriesSection dates={timeSeriesDates} />
-            <div className="pointer-events-none opacity-50 flex flex-col gap-4">
+            {/* <div className="pointer-events-none opacity-50 flex flex-col gap-4">
               <SensorSection />
-            </div>
+            </div> */}
             <DimensionSection />
           </div>
         )}
