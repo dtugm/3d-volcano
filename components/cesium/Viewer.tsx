@@ -19,13 +19,25 @@ import {
   TerrainProvider,
   TileMapServiceImageryProvider,
   Viewer as CesiumViewer,
+  Color,
+  LabelStyle,
+  Cartesian2,
+  Cartographic,
+  ScreenSpaceEventType,
 } from "cesium";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Cesium3DTileset,
   CesiumComponentRef,
   ImageryLayer,
   Viewer,
+  Entity,
+  PointGraphics,
+  PolylineGraphics,
+  LabelGraphics,
+  EllipseGraphics,
+  ScreenSpaceEventHandler,
+  ScreenSpaceEvent,
 } from "resium";
 
 import { useVolcano } from "@/lib/volcano";
@@ -69,6 +81,12 @@ export default function CesiumViewerComponent() {
     comparisonLeftYearData,
     comparisonRightYearData,
     basemap,
+    activeMeasurementMode,
+    measuredData,
+    setMeasuredData,
+    isSimulatingVolume,
+    simulationWaterLevel,
+    simulationType,
   } = useVolcano();
   const previousMountainIdRef = useRef<string | null>(null);
   const previousYearRef = useRef<string | null>(null);
@@ -83,6 +101,96 @@ export default function CesiumViewerComponent() {
   const [rightOrthoProvider, setRightOrthoProvider] =
     useState<ImageryProvider | null>(null);
   const baseLayerRef = useRef<CesiumImageryLayer | null>(null);
+
+  const [clickedPoints, setClickedPoints] = useState<Cartesian3[]>([]);
+
+  // Reset local clickedPoints when measurement mode or mountain changes
+  useEffect(() => {
+    setClickedPoints([]);
+  }, [activeMeasurementMode, activeMountainId]);
+
+  // Change cursor to crosshair when measurement mode is active
+  useEffect(() => {
+    const viewer = viewerRef.current?.cesiumElement;
+    if (!viewer || viewer.isDestroyed()) return;
+    const canvas = viewer.canvas;
+    if (canvas) {
+      if (activeMeasurementMode !== "none") {
+        canvas.style.cursor = "crosshair";
+      } else {
+        canvas.style.cursor = "default";
+      }
+    }
+  }, [activeMeasurementMode]);
+
+  const handleLeftClick = (movement: { position?: Cartesian2; startPosition?: Cartesian2; endPosition?: Cartesian2 }) => {
+    if (activeMeasurementMode === "none") return;
+    const position = movement.position;
+    if (!position) return;
+    const viewer = viewerRef.current?.cesiumElement;
+    if (!viewer) return;
+
+    let cartesian;
+    if (viewer.scene.pickPositionSupported) {
+      cartesian = viewer.scene.pickPosition(position);
+    }
+    
+    if (!cartesian) {
+      const ray = viewer.camera.getPickRay(position);
+      if (ray) {
+        cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+      }
+    }
+
+    if (!cartesian) return;
+
+    setClickedPoints((prev) => {
+      let nextPoints = [...prev];
+      if (nextPoints.length >= 2) {
+        nextPoints = [cartesian];
+        setMeasuredData((d) => ({
+          ...d,
+          diameter: null,
+          depth: null,
+        }));
+      } else {
+        nextPoints.push(cartesian);
+      }
+
+      if (nextPoints.length === 2) {
+        const p1 = nextPoints[0];
+        const p2 = nextPoints[1];
+
+        if (activeMeasurementMode === "ruler") {
+          const distance3D = Cartesian3.distance(p1, p2);
+          setMeasuredData((d) => ({
+            ...d,
+            diameter: Math.round(distance3D),
+          }));
+        } else if (activeMeasurementMode === "depth") {
+          const c1 = Cartographic.fromCartesian(p1);
+          const c2 = Cartographic.fromCartesian(p2);
+          const depthVal = Math.abs(c1.height - c2.height);
+          setMeasuredData((d) => ({
+            ...d,
+            depth: Math.round(depthVal),
+          }));
+        }
+      }
+
+      return nextPoints;
+    });
+  };
+
+  const currentSimulatedRadius = useMemo(() => {
+    if (!isSimulatingVolume || !activeMountain?.craterDetails) return 0;
+    const { floorElevation, rimElevation, minRadius, maxRadius } = activeMountain.craterDetails;
+    const fraction = Math.max(
+      0,
+      Math.min(1, (simulationWaterLevel - floorElevation) / (rimElevation - floorElevation))
+    );
+    return minRadius + fraction * (maxRadius - minRadius);
+  }, [isSimulatingVolume, activeMountain, simulationWaterLevel]);
 
   // Track when the Cesium viewer is mounted
   const viewerRefCallback = useCallback(
@@ -358,6 +466,97 @@ export default function CesiumViewerComponent() {
           url={activeYearData.gaussianSplatUrl}
           onReady={handleTilesetReady}
         />
+      )}
+
+      {/* Screen-space handler for picking measurement coordinates */}
+      {activeMeasurementMode !== "none" && (
+        <ScreenSpaceEventHandler>
+          <ScreenSpaceEvent
+            action={handleLeftClick}
+            type={ScreenSpaceEventType.LEFT_CLICK}
+          />
+        </ScreenSpaceEventHandler>
+      )}
+
+      {/* Pins showing the clicked points */}
+      {clickedPoints.map((point, index) => (
+        <Entity
+          key={`dimension-pin-${index}`}
+          position={point}
+        >
+          <PointGraphics
+            pixelSize={10}
+            color={Color.YELLOW}
+            outlineColor={Color.BLACK}
+            outlineWidth={2}
+            disableDepthTestDistance={Number.POSITIVE_INFINITY}
+          />
+          <LabelGraphics
+            text={index === 0 ? "Titik A" : "Titik B"}
+            font="bold 12px Outfit, Inter, sans-serif"
+            fillColor={Color.WHITE}
+            outlineColor={Color.BLACK}
+            outlineWidth={3}
+            style={LabelStyle.FILL_AND_OUTLINE}
+            pixelOffset={new Cartesian2(0, -20)}
+            disableDepthTestDistance={Number.POSITIVE_INFINITY}
+          />
+        </Entity>
+      ))}
+
+      {/* Glow polyline between two measurement points */}
+      {clickedPoints.length === 2 && (
+        <Entity>
+          <PolylineGraphics
+            positions={clickedPoints}
+            width={4}
+            material={Color.YELLOW}
+          />
+          {/* Bold midpoint text indicator overlay */}
+          <Entity position={Cartesian3.midpoint(clickedPoints[0], clickedPoints[1], new Cartesian3())}>
+            <LabelGraphics
+              text={
+                activeMeasurementMode === "ruler"
+                  ? `${measuredData.diameter ?? 0} m`
+                  : `Selisih Ketinggian (Kedalaman): ${measuredData.depth ?? 0} m`
+              }
+              font="bold 14px Outfit, Inter, sans-serif"
+              fillColor={Color.YELLOW}
+              outlineColor={Color.BLACK}
+              outlineWidth={3}
+              style={LabelStyle.FILL_AND_OUTLINE}
+              pixelOffset={new Cartesian2(0, -12)}
+              disableDepthTestDistance={Number.POSITIVE_INFINITY}
+            />
+          </Entity>
+        </Entity>
+      )}
+
+      {/* Real-time translucent water-lake or lava-dome visual volume simulator */}
+      {isSimulatingVolume && activeMountain?.craterDetails && (
+        <Entity
+          position={Cartesian3.fromDegrees(
+            activeMountain.craterDetails.craterCenter.longitude,
+            activeMountain.craterDetails.craterCenter.latitude,
+            simulationWaterLevel
+          )}
+        >
+          <EllipseGraphics
+            semiMajorAxis={currentSimulatedRadius}
+            semiMinorAxis={currentSimulatedRadius}
+            height={simulationWaterLevel}
+            material={
+              simulationType === "water"
+                ? Color.AQUA.withAlpha(0.4)
+                : Color.ORANGE.withAlpha(0.5)
+            }
+            outline={true}
+            outlineColor={
+              simulationType === "water" ? Color.AQUA : Color.ORANGE
+            }
+            outlineWidth={2}
+          />
+        </Entity>
       )}
     </Viewer>
   );

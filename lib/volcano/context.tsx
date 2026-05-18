@@ -14,12 +14,13 @@ import { Mountain, MOUNTAINS, YearData } from "./types";
 export type LayerType = "terrain" | "ortho" | "tiles3d" | "gaussianSplat";
 export type ComparisonMode = "ortho" | "terrain" | "gaussianSplat";
 export type BasemapType = "osm" | "cesium" | "esri";
+export type MeasurementMode = "none" | "ruler" | "depth";
+export type SimulationType = "water" | "lava";
 
-export interface LayerVisibility {
-  terrain: boolean;
-  ortho: boolean;
-  tiles3d: boolean;
-  gaussianSplat: boolean;
+export interface DimensionData {
+  diameter: number | null;
+  depth: number | null;
+  volumeDelta: number | null;
 }
 
 interface VolcanoContextValue {
@@ -46,6 +47,24 @@ interface VolcanoContextValue {
   comparisonRightYearData: YearData | undefined;
   basemap: BasemapType;
   setBasemap: (basemap: BasemapType) => void;
+  // Dimension and volume simulation
+  activeMeasurementMode: MeasurementMode;
+  setActiveMeasurementMode: (mode: MeasurementMode) => void;
+  measuredData: DimensionData;
+  setMeasuredData: React.Dispatch<React.SetStateAction<DimensionData>>;
+  isSimulatingVolume: boolean;
+  setIsSimulatingVolume: (simulating: boolean) => void;
+  simulationWaterLevel: number;
+  setSimulationWaterLevel: (level: number) => void;
+  simulationType: SimulationType;
+  setSimulationType: (type: SimulationType) => void;
+}
+
+export interface LayerVisibility {
+  terrain: boolean;
+  ortho: boolean;
+  tiles3d: boolean;
+  gaussianSplat: boolean;
 }
 
 const VolcanoContext = createContext<VolcanoContextValue | null>(null);
@@ -69,6 +88,19 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
   const [comparisonRightYear, setComparisonRightYear] = useState<string>("");
   const [splitPosition, setSplitPosition] = useState(0.5);
   const [basemap, setBasemap] = useState<BasemapType>("osm");
+
+  // Dimension & simulation states
+  const [activeMeasurementMode, setActiveMeasurementMode] = useState<MeasurementMode>("none");
+  const [measuredData, setMeasuredData] = useState<DimensionData>({
+    diameter: null,
+    depth: null,
+    volumeDelta: null,
+  });
+  const [isSimulatingVolume, setIsSimulatingVolume] = useState<boolean>(false);
+  const [simulationWaterLevel, setSimulationWaterLevel] = useState<number>(
+    MOUNTAINS[0].craterDetails?.floorElevation || 2780
+  );
+  const [simulationType, setSimulationType] = useState<SimulationType>("water");
 
   const activeMountain = MOUNTAINS.find((m) => m.id === activeMountainId);
 
@@ -98,6 +130,17 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
     setComparisonLeftYear("");
     setComparisonRightYear("");
     setSplitPosition(0.5);
+
+    // Reset dimension measurements and simulation on mountain change
+    setActiveMeasurementMode("none");
+    setMeasuredData({
+      diameter: null,
+      depth: null,
+      volumeDelta: null,
+    });
+    setIsSimulatingVolume(false);
+    setSimulationWaterLevel(mountain?.craterDetails?.floorElevation || 2780);
+    setSimulationType("water");
   }, []);
 
   const setActiveYear = useCallback((year: string) => {
@@ -173,6 +216,16 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
         comparisonRightYearData,
         basemap,
         setBasemap,
+        activeMeasurementMode,
+        setActiveMeasurementMode,
+        measuredData,
+        setMeasuredData,
+        isSimulatingVolume,
+        setIsSimulatingVolume,
+        simulationWaterLevel,
+        setSimulationWaterLevel,
+        simulationType,
+        setSimulationType,
       }}
     >
       {children}

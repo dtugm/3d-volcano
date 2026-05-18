@@ -118,8 +118,8 @@ const LeftSideBar = () => {
             <TimeSeriesSection dates={timeSeriesDates} />
             <div className="pointer-events-none opacity-50 flex flex-col gap-4">
               <SensorSection />
-              <DimensionSection />
             </div>
+            <DimensionSection />
           </div>
         )}
       </div>

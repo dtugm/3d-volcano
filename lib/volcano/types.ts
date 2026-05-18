@@ -5,6 +5,19 @@ export interface YearData {
   gaussianSplatUrl?: string;
 }
 
+export interface CraterDetails {
+  craterCenter: { latitude: number; longitude: number };
+  floorElevation: number; // meters
+  rimElevation: number;   // meters
+  minRadius: number;      // meters
+  maxRadius: number;      // meters
+  baseDiameter: string;   // e.g. "900 m"
+  baseDepth: string;      // e.g. "250 m"
+  baseVolume: string;     // e.g. "42,500,000 m³"
+  geologyType: string;
+  lastEruption: string;
+}
+
 export interface Mountain {
   id: string;
   name: string;
@@ -14,6 +27,7 @@ export interface Mountain {
   series: number;
   years: string[];
   yearData: Record<string, YearData>;
+  craterDetails?: CraterDetails;
 }
 
 export const MOUNTAINS: Mountain[] = [
@@ -59,6 +73,18 @@ export const MOUNTAINS: Mountain[] = [
           "https://bucket.dt-volcano.geo-ai.id/GaussianSplat/gunung-agung/2020/tileset.json",
       },
     },
+    craterDetails: {
+      craterCenter: { latitude: -8.343, longitude: 115.508 },
+      floorElevation: 2780,
+      rimElevation: 3031,
+      minRadius: 150,
+      maxRadius: 450,
+      baseDiameter: "900 m",
+      baseDepth: "250 m",
+      baseVolume: "42.500.000 m³",
+      geologyType: "Stratovolkano Aktif (Tipe A)",
+      lastEruption: "2019",
+    },
   },
   {
     id: "gunung-kelud",
@@ -77,6 +103,18 @@ export const MOUNTAINS: Mountain[] = [
         terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-kelud/2026",
         orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-kelud/2026",
       },
+    },
+    craterDetails: {
+      craterCenter: { latitude: -7.930, longitude: 112.308 },
+      floorElevation: 1380,
+      rimElevation: 1731,
+      minRadius: 250,
+      maxRadius: 750,
+      baseDiameter: "1.500 m",
+      baseDepth: "350 m",
+      baseVolume: "55.000.000 m³",
+      geologyType: "Stratovolkano dengan Danau Kawah",
+      lastEruption: "2014",
     },
   },
 ];
