@@ -40,6 +40,7 @@ import {
   ScreenSpaceEvent,
 } from "resium";
 
+import FpsOverlay from "@/components/fps-overlay";
 import { useVolcano } from "@/lib/volcano";
 
 declare global {
@@ -92,6 +93,11 @@ export default function CesiumViewerComponent() {
   const previousYearRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
   const [viewerReady, setViewerReady] = useState(false);
+  const [showFps, setShowFps] = useState(false);
+  const [fps, setFps] = useState(0);
+  const [frameTime, setFrameTime] = useState(0);
+  const fpsRef = useRef({ lastTime: 0, frames: 0 });
+
   const [terrainProvider, setTerrainProvider] =
     useState<TerrainProvider | null>(null);
   const [orthoImageryProvider, setOrthoImageryProvider] =
@@ -191,6 +197,34 @@ export default function CesiumViewerComponent() {
     );
     return minRadius + fraction * (maxRadius - minRadius);
   }, [isSimulatingVolume, activeMountain, simulationWaterLevel]);
+
+  // FPS tracking via Cesium postRender event
+  useEffect(() => {
+    if (!viewerReady || !showFps) return;
+    const viewer = viewerRef.current?.cesiumElement;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    fpsRef.current = { lastTime: performance.now(), frames: 0 };
+
+    const handler = () => {
+      const now = performance.now();
+      const delta = now - fpsRef.current.lastTime;
+      fpsRef.current.frames++;
+      if (delta >= 500) {
+        const currentFps = Math.round((fpsRef.current.frames * 1000) / delta);
+        setFps(currentFps);
+        setFrameTime(delta / fpsRef.current.frames);
+        fpsRef.current = { lastTime: now, frames: 0 };
+      }
+    };
+
+    viewer.scene.postRender.addEventListener(handler);
+    return () => {
+      if (!viewer.isDestroyed()) {
+        viewer.scene.postRender.removeEventListener(handler);
+      }
+    };
+  }, [viewerReady, showFps]);
 
   // Track when the Cesium viewer is mounted
   const viewerRefCallback = useCallback(
@@ -425,6 +459,7 @@ export default function CesiumViewerComponent() {
   }, [layerVisibility.terrain, terrainProvider]);
 
   return (
+    <div className="relative w-full h-full">
     <Viewer
       ref={viewerRefCallback}
       full
@@ -559,5 +594,12 @@ export default function CesiumViewerComponent() {
         </Entity>
       )}
     </Viewer>
+    <FpsOverlay
+      fps={fps}
+      frameTime={frameTime}
+      visible={showFps}
+      onToggle={() => setShowFps((v) => !v)}
+    />
+    </div>
   );
 }

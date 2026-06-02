@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
+import FpsOverlay from "@/components/fps-overlay";
 import { createTerrainMesh } from "@/lib/half-3d/create-terrain-mesh";
 import { loadGeoTiff } from "@/lib/half-3d/load-geotiff";
 import { EpochInfo, EPOCHS } from "@/lib/half-3d/types";
@@ -33,6 +34,10 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
   );
   const [verticalExaggeration, setVerticalExaggeration] = useState(1);
   const [layerSpacing, setLayerSpacing] = useState(0);
+  const [showFps, setShowFps] = useState(false);
+  const [fps, setFps] = useState(0);
+  const [frameTime, setFrameTime] = useState(0);
+  const fpsRef = useRef({ lastTime: 0, frames: 0 });
 
   const handleToggleLayer = useCallback((index: number) => {
     setLayerVisibility((prev) => {
@@ -95,12 +100,22 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
     };
     sceneRef.current = state;
 
-    // Animation loop
+    // Animation loop with FPS tracking
     function animate() {
       state.animationId = requestAnimationFrame(animate);
       controls.update();
       renderer.render(scene, camera);
+
+      const now = performance.now();
+      fpsRef.current.frames++;
+      const delta = now - fpsRef.current.lastTime;
+      if (delta >= 500) {
+        setFps(Math.round((fpsRef.current.frames * 1000) / delta));
+        setFrameTime(delta / fpsRef.current.frames);
+        fpsRef.current = { lastTime: now, frames: 0 };
+      }
     }
+    fpsRef.current = { lastTime: performance.now(), frames: 0 };
     animate();
 
     // Resize handling
@@ -240,6 +255,13 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
           onSpacingChange={setLayerSpacing}
         />
       )}
+
+      <FpsOverlay
+        fps={fps}
+        frameTime={frameTime}
+        visible={showFps}
+        onToggle={() => setShowFps((v) => !v)}
+      />
     </div>
   );
 }
