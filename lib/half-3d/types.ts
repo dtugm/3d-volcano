@@ -55,6 +55,28 @@ export const EPOCHS: EpochInfo[] = [
   },
 ];
 
+export const KELUD_EPOCHS: EpochInfo[] = [
+  {
+    id: "T1",
+    label: "T1: 2014",
+    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/Kelud/clip_2014.tif",
+    color: EPOCH_COLORS[0],
+  },
+  {
+    id: "T2",
+    label: "T2: 2026",
+    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/Kelud/clip_2026.tif",
+    color: EPOCH_COLORS[1],
+  },
+];
+
+export const VOLCANOES = [
+  { id: "agung" as const, name: "Gunung Agung", epochs: EPOCHS },
+  { id: "kelud" as const, name: "Gunung Kelud", epochs: KELUD_EPOCHS },
+];
+
+export type VolcanoId = "agung" | "kelud";
+
 export interface ElevationData {
   width: number;
   height: number;

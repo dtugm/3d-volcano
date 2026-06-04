@@ -1,8 +1,9 @@
 "use client";
 
-import { EPOCHS } from "@/lib/half-3d/types";
+import { EpochInfo } from "@/lib/half-3d/types";
 
 interface LayerControlsProps {
+  epochs: EpochInfo[];
   layerVisibility: boolean[];
   onToggleLayer: (index: number) => void;
   verticalExaggeration: number;
@@ -12,6 +13,7 @@ interface LayerControlsProps {
 }
 
 export default function LayerControls({
+  epochs,
   layerVisibility,
   onToggleLayer,
   verticalExaggeration,
@@ -26,7 +28,7 @@ export default function LayerControls({
       </h3>
 
       <div className="space-y-1.5 mb-4">
-        {EPOCHS.map((epoch, i) => (
+        {epochs.map((epoch, i) => (
           <label
             key={epoch.id}
             className="flex items-center gap-2 cursor-pointer hover:bg-white/10 rounded px-1.5 py-1 transition-colors"

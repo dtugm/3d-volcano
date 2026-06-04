@@ -4,14 +4,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
+import FpsOverlay from "@/components/fps-overlay";
 import { createTerrainMesh } from "@/lib/half-3d/create-terrain-mesh";
 import { loadGeoTiff } from "@/lib/half-3d/load-geotiff";
-import { EPOCHS } from "@/lib/half-3d/types";
+import { EpochInfo, EPOCHS } from "@/lib/half-3d/types";
 
 import LayerControls from "./LayerControls";
 
-export default function TerrainViewer() {
+interface TerrainViewerProps {
+  epochs?: EpochInfo[];
+}
+
+export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const epochsRef = useRef(epochs);
   const sceneRef = useRef<{
     renderer: THREE.WebGLRenderer;
     scene: THREE.Scene;
@@ -24,10 +30,14 @@ export default function TerrainViewer() {
   const [loading, setLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
   const [layerVisibility, setLayerVisibility] = useState<boolean[]>(() =>
-    EPOCHS.map(() => true),
+    epochs.map(() => true),
   );
   const [verticalExaggeration, setVerticalExaggeration] = useState(1);
   const [layerSpacing, setLayerSpacing] = useState(0);
+  const [showFps, setShowFps] = useState(false);
+  const [fps, setFps] = useState(0);
+  const [frameTime, setFrameTime] = useState(0);
+  const fpsRef = useRef({ lastTime: 0, frames: 0 });
 
   const handleToggleLayer = useCallback((index: number) => {
     setLayerVisibility((prev) => {
@@ -90,12 +100,22 @@ export default function TerrainViewer() {
     };
     sceneRef.current = state;
 
-    // Animation loop
+    // Animation loop with FPS tracking
     function animate() {
       state.animationId = requestAnimationFrame(animate);
       controls.update();
       renderer.render(scene, camera);
+
+      const now = performance.now();
+      fpsRef.current.frames++;
+      const delta = now - fpsRef.current.lastTime;
+      if (delta >= 500) {
+        setFps(Math.round((fpsRef.current.frames * 1000) / delta));
+        setFrameTime(delta / fpsRef.current.frames);
+        fpsRef.current = { lastTime: now, frames: 0 };
+      }
     }
+    fpsRef.current = { lastTime: performance.now(), frames: 0 };
     animate();
 
     // Resize handling
@@ -115,7 +135,7 @@ export default function TerrainViewer() {
     (async () => {
       let count = 0;
 
-      const promises = EPOCHS.map(async (epoch) => {
+      const promises = epochsRef.current.map(async (epoch) => {
         const data = await loadGeoTiff(epoch.url);
         if (cancelled) return data;
         count++;
@@ -129,8 +149,8 @@ export default function TerrainViewer() {
       // Create meshes (geometry built once with exaggeration=1.0)
       const meshes: THREE.Mesh[] = [];
       results.forEach((data, i) => {
-        const mesh = createTerrainMesh(data, EPOCHS[i].color);
-        mesh.name = EPOCHS[i].id;
+        const mesh = createTerrainMesh(data, epochsRef.current[i].color);
+        mesh.name = epochsRef.current[i].id;
         mesh.scale.y = 1; // initial vertical exaggeration via scale
         mesh.position.y = i * 0; // initial spacing
         scene.add(mesh);
@@ -213,12 +233,12 @@ export default function TerrainViewer() {
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0F1419]">
           <div className="text-white text-lg mb-2">Loading Terrain Data...</div>
           <div className="text-white/60 text-sm">
-            {loadProgress} / {EPOCHS.length} files loaded
+            {loadProgress} / {epochs.length} files loaded
           </div>
           <div className="w-48 h-1 bg-white/20 rounded-full mt-3 overflow-hidden">
             <div
               className="h-full bg-white rounded-full transition-all duration-300"
-              style={{ width: `${(loadProgress / EPOCHS.length) * 100}%` }}
+              style={{ width: `${(loadProgress / epochs.length) * 100}%` }}
             />
           </div>
         </div>
@@ -226,6 +246,7 @@ export default function TerrainViewer() {
 
       {!loading && (
         <LayerControls
+          epochs={epochs}
           layerVisibility={layerVisibility}
           onToggleLayer={handleToggleLayer}
           verticalExaggeration={verticalExaggeration}
@@ -234,6 +255,13 @@ export default function TerrainViewer() {
           onSpacingChange={setLayerSpacing}
         />
       )}
+
+      <FpsOverlay
+        fps={fps}
+        frameTime={frameTime}
+        visible={showFps}
+        onToggle={() => setShowFps((v) => !v)}
+      />
     </div>
   );
 }
