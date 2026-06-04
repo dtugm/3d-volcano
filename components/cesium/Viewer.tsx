@@ -32,6 +32,7 @@ import LaharzEnvelope from "@/components/lahar/LaharzEnvelope";
 import SimDepthRenderer from "@/components/lahar/SimDepthRenderer";
 import SimParticleRenderer from "@/components/lahar/SimParticleRenderer";
 import SimSourcePicker from "@/components/lahar/SimSourcePicker";
+import StreamRenderer from "@/components/lahar/StreamRenderer";
 import { useLaharData } from "@/lib/lahar";
 import { getProfile } from "@/lib/lahar/materials";
 import { useVolcano } from "@/lib/volcano";
@@ -378,7 +379,16 @@ export default function CesiumViewerComponent() {
           data={laharData}
         />
       ) : null}
-      {simulationMode === "lahar" && laharData ? (
+      {simulationMode !== "off" && laharData ? (
+        <StreamRenderer
+          viewer={viewerRef.current?.cesiumElement ?? null}
+          mainstem={laharData.mainstem}
+          branches={laharData.branches}
+          lspCandidates={laharData.lspCandidates}
+          selectedLSP={selectedLSP}
+        />
+      ) : null}
+      {simulationMode !== "off" && laharData ? (
         <SimDepthRenderer
           viewer={viewerRef.current?.cesiumElement ?? null}
           bbox={laharData.heightmapMeta.bbox}

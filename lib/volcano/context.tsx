@@ -13,6 +13,7 @@ import { useLaharData } from "@/lib/lahar/hooks/use-lahar-data";
 import { useSimEngine } from "@/lib/lahar/hooks/use-sim-engine";
 import type {
   LSPCandidate,
+  LSPRejection,
   MaterialProfileId,
   SimSnapshot,
   SimStatus,
@@ -67,11 +68,14 @@ interface VolcanoContextValue {
   setVolumeInput: (v: VolumeTriple) => void;
   simStatus: SimStatus;
   setSimStatus: (s: SimStatus) => void;
+  simRejection: LSPRejection | null;
+  setSimRejection: (r: LSPRejection | null) => void;
   simSnapshot: SimSnapshot | null;
   simReady: boolean;
   simRunning: boolean;
   setSimRunning: (running: boolean) => void;
   simSetSource: (r: number, c: number) => void;
+  simSetBudget: (m3: number | null) => void;
   simReset: () => void;
 }
 
@@ -109,6 +113,7 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
     max: 20000,
   });
   const [simStatus, setSimStatus] = useState<SimStatus>("idle");
+  const [simRejection, setSimRejection] = useState<LSPRejection | null>(null);
 
   const setSimulationMode = useCallback((mode: SimulationMode) => {
     setSimulationModeState(mode);
@@ -247,11 +252,14 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
         setVolumeInput,
         simStatus,
         setSimStatus,
+        simRejection,
+        setSimRejection,
         simSnapshot: sim.snapshot,
         simReady: sim.ready,
         simRunning: sim.running,
         setSimRunning: sim.setRunning,
         simSetSource: sim.setSource,
+        simSetBudget: sim.setBudget,
         simReset: sim.reset,
       }}
     >

@@ -27,6 +27,7 @@ export class D8Solver {
   readonly depth: DepthGrid;
   readonly props: MaterialProfile;
   particles: Particle[] = [];
+  injecting = true;
   private sourceR = -1;
   private sourceC = -1;
 
@@ -63,7 +64,7 @@ export class D8Solver {
 
   step(): void {
     // Inject
-    if (this.sourceR >= 0 && this.particles.length < MAX_PARTICLES) {
+    if (this.injecting && this.sourceR >= 0 && this.particles.length < MAX_PARTICLES) {
       for (let i = 0; i < PARTICLES_PER_TICK; i++) {
         this.particles.push({ r: this.sourceR, c: this.sourceC, age: 0 });
       }

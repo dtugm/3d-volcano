@@ -79,8 +79,11 @@ export function validateLSPClick(
       candidate = c;
     }
   }
-  if (candidate && bestCandKm * 1000 <= 150) {
+  if (candidate && bestCandKm * 1000 <= 400) {
     return { ok: true, snapped: { lng: candidate.lng, lat: candidate.lat }, candidate };
   }
-  return { ok: false, snapped, reason: "not_at_junction" };
+  // No curated candidate close enough — accept the snapped stream point
+  // itself so the user is not blocked. The engine only needs a valid
+  // (lng, lat) on the heightmap; the candidate is optional metadata.
+  return { ok: true, snapped, candidate: undefined };
 }

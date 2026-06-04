@@ -65,6 +65,9 @@ export interface SimSnapshot {
   particles?: Float32Array; // [x0,y0,age0, x1,y1,age1, ...]
   maxDepth: number;
   wettedCells: number;
+  injectedM3: number;
+  budgetM3: number | null;
+  injecting: boolean;
 }
 
 export type SimulationMode = "off" | "lahar" | "lava";

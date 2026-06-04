@@ -38,9 +38,16 @@ export function useSimEngine({
       });
       workerRef.current = w;
       w.onmessage = (e) => {
-        if (e.data?.type === "ready") setReady(true);
-        else if (e.data?.type === "snapshot") setSnapshot(e.data.snap as SimSnapshot);
-        else if (e.data?.type === "error") console.error("[sim worker]", e.data.message);
+        if (e.data?.type === "ready") {
+          setReady(true);
+        } else if (e.data?.type === "snapshot") {
+          setSnapshot(e.data.snap as SimSnapshot);
+        } else if (e.data?.type === "error") {
+          console.error("[lahar:worker] reported error:", e.data.message);
+        }
+      };
+      w.onerror = (ev) => {
+        console.error("[lahar:engine] worker.onerror", ev.message);
       };
       w.postMessage(
         {
@@ -68,9 +75,12 @@ export function useSimEngine({
 
   useEffect(() => {
     if (!running || !ready) return;
+    // Steps advanced per rAF tick. The worker runs the physics off the main
+    // thread; 2 steps/frame caps it at ~120 steps/sec at 60fps.
+    const STEPS_PER_FRAME = 2;
     let raf = 0;
     const tick = () => {
-      workerRef.current?.postMessage({ type: "step", count: 4 });
+      workerRef.current?.postMessage({ type: "step", count: STEPS_PER_FRAME });
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -87,6 +97,9 @@ export function useSimEngine({
     },
     setProfile(id: MaterialProfileId) {
       workerRef.current?.postMessage({ type: "setProfile", profileId: id });
+    },
+    setBudget(budgetM3: number | null) {
+      workerRef.current?.postMessage({ type: "setBudget", budgetM3 });
     },
     reset() {
       workerRef.current?.postMessage({ type: "reset" });

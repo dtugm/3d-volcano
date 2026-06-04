@@ -1,6 +1,10 @@
 import type { TerrainGrid } from "../terrain/grid";
 import type { MaterialProfile } from "../types";
-import { CFL, G, H_MIN, MAX_DT } from "./constants";
+import { CFL, G, H_MIN, MAX_DEPTH, MAX_DT } from "./constants";
+
+// Absolute ceiling on the per-width flux (m²/s). Stops a single cell's
+// momentum from exploding if the terrain gradient is pathological.
+const Q_MAX = MAX_DEPTH * 30;
 
 /**
  * 2D shallow-water (Saint-Venant) solver, explicit first-order upwind.
@@ -24,6 +28,7 @@ export class SweSolver {
   private qxNew: Float32Array;
   private qyNew: Float32Array;
 
+  injecting = true;
   private sourceR = -1;
   private sourceC = -1;
   private sourceQ = 0; // m³/s
@@ -79,7 +84,7 @@ export class SweSolver {
     const dy = cellSizeM;
 
     // Source injection
-    if (this.sourceR >= 0 && this.sourceQ > 0) {
+    if (this.injecting && this.sourceR >= 0 && this.sourceQ > 0) {
       const cellArea = dx * dy;
       this.h[this.sourceR * cols + this.sourceC] += (this.sourceQ * dt) / cellArea;
     }
@@ -93,13 +98,24 @@ export class SweSolver {
         const i = r * cols + c;
         const hC = this.h[i];
 
-        // Continuity: upwind flux differencing
-        const qxL = this.qx[i - 1];
-        const qxR = this.qx[i + 1];
-        const qyU = this.qy[i - cols];
-        const qyD = this.qy[i + cols];
-        this.hNew[i] = hC - dt * ((qxR - qxL) / (2 * dx) + (qyD - qyU) / (2 * dy));
-        if (this.hNew[i] < 0) this.hNew[i] = 0;
+        // Continuity via conservative donor-cell (first-order upwind) flux
+        // differencing. Face fluxes are taken from the upwind cell based on
+        // the sign of the flux at the face, which is stable under the CFL
+        // timestep without the heavy smearing of Lax-Friedrichs. The previous
+        // centred FTCS form (hC - dt*centred-divergence) had no dissipation,
+        // was unconditionally unstable, and let depth blow up to >1000 m —
+        // which washed the renderer's depth-normalised opacity to nothing.
+        // qy is positive toward +row (south, since row 0 is north).
+        const fE = this.qx[i] + this.qx[i + 1] >= 0 ? this.qx[i] : this.qx[i + 1];
+        const fW = this.qx[i - 1] + this.qx[i] >= 0 ? this.qx[i - 1] : this.qx[i];
+        const fS =
+          this.qy[i] + this.qy[i + cols] >= 0 ? this.qy[i] : this.qy[i + cols];
+        const fN =
+          this.qy[i - cols] + this.qy[i] >= 0 ? this.qy[i - cols] : this.qy[i];
+        let hn = hC - dt * ((fE - fW) / dx + (fS - fN) / dy);
+        if (hn < 0) hn = 0;
+        else if (hn > MAX_DEPTH) hn = MAX_DEPTH;
+        this.hNew[i] = hn;
 
         if (hC < H_MIN) {
           this.qxNew[i] = 0;
@@ -131,8 +147,14 @@ export class SweSolver {
         const hPow = Math.pow(Math.max(hC, H_MIN), 4 / 3);
         const friction = (G * manningN * manningN * speed) / hPow;
         const frictionFactor = Math.min(friction * dt, 1.0); // clamp to avoid sign flip
-        this.qxNew[i] = this.qx[i] * (1 - frictionFactor) + dt * (-G * hC * dHdx);
-        this.qyNew[i] = this.qy[i] * (1 - frictionFactor) + dt * (-G * hC * dHdy);
+        let nqx = this.qx[i] * (1 - frictionFactor) + dt * (-G * hC * dHdx);
+        let nqy = this.qy[i] * (1 - frictionFactor) + dt * (-G * hC * dHdy);
+        if (nqx > Q_MAX) nqx = Q_MAX;
+        else if (nqx < -Q_MAX) nqx = -Q_MAX;
+        if (nqy > Q_MAX) nqy = Q_MAX;
+        else if (nqy < -Q_MAX) nqy = -Q_MAX;
+        this.qxNew[i] = nqx;
+        this.qyNew[i] = nqy;
       }
     }
 

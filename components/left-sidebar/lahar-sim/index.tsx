@@ -28,7 +28,9 @@ export default function LaharSimSection() {
     simRunning,
     setSimRunning,
     simSetSource,
+    simSetBudget,
     simReset,
+    simRejection,
   } = useVolcano();
 
   const { data: laharData } = useLaharData(activeYearData?.laharData);
@@ -49,12 +51,23 @@ export default function LaharSimSection() {
     if (selectedLSP.candidate) setVolumeInput(selectedLSP.candidate.slv);
   }, [selectedLSP, laharData, simReady, simSetSource, setVolumeInput]);
 
+  // Push the user-chosen volume budget into the engine. When the engine
+  // has injected this much material, source injection stops — the flow
+  // continues draining downhill but no more lahar/lava is added.
+  useEffect(() => {
+    if (!simReady) return;
+    simSetBudget(volumeInput.likely > 0 ? volumeInput.likely : null);
+  }, [simReady, volumeInput.likely, simSetBudget]);
+
   const stats = useMemo(() => {
     if (!simSnapshot) return null;
     return {
       maxDepth: simSnapshot.maxDepth,
       wettedCells: simSnapshot.wettedCells,
       timeS: simSnapshot.timeS,
+      injectedM3: simSnapshot.injectedM3,
+      budgetM3: simSnapshot.budgetM3,
+      injecting: simSnapshot.injecting,
     };
   }, [simSnapshot]);
 
@@ -91,6 +104,18 @@ export default function LaharSimSection() {
             {!selectedLSP ? (
               <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-2 py-1.5">
                 {t.simulation.promptClick}
+              </p>
+            ) : null}
+            {simRejection ? (
+              <p className="text-xs text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-900/30 rounded-lg px-2 py-1.5">
+                <span className="font-semibold">Click rejected: </span>
+                {simRejection === "outside_stream"
+                  ? "Too far from a mainstem (>80 m). Click closer to a cyan line."
+                  : simRejection === "below_hazard_cone"
+                  ? "Outside hazard cone. Click higher up the mountain."
+                  : simRejection === "not_in_deposition"
+                  ? "Outside deposition zone."
+                  : "No LSP candidate within 150 m on this stream. Try a yellow dot."}
               </p>
             ) : null}
             <SimControls

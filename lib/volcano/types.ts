@@ -60,6 +60,16 @@ export const MOUNTAINS: Mountain[] = [
         orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-agung/2020",
         gaussianSplatUrl:
           "https://bucket.dt-volcano.geo-ai.id/GaussianSplat/gunung-agung/2020/tileset.json",
+        laharData: {
+          baseUrl: "/lahar-test-data/gunung-agung/2020",
+          mainstem: "mainstem.geojson",
+          branches: "branches.geojson",
+          deposition: "deposition.geojson",
+          hazardCone: "hazardCone.geojson",
+          lspCandidates: "lspCandidates.geojson",
+          heightmap: "heightmap.png",
+          heightmapMeta: "heightmap.json",
+        },
       },
     },
   },
