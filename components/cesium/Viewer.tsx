@@ -41,6 +41,7 @@ import {
 } from "resium";
 
 import FpsOverlay from "@/components/fps-overlay";
+import { useTranslation } from "@/lib/i18n";
 import { useVolcano } from "@/lib/volcano";
 
 declare global {
@@ -71,6 +72,7 @@ const osmImageryProvider = new OpenStreetMapImageryProvider({
 
 export default function CesiumViewerComponent() {
   const viewerRef = useRef<CesiumComponentRef<CesiumViewer>>(null);
+  const { t } = useTranslation();
   const {
     activeMountain,
     activeMountainId,
@@ -527,7 +529,7 @@ export default function CesiumViewerComponent() {
             disableDepthTestDistance={Number.POSITIVE_INFINITY}
           />
           <LabelGraphics
-            text={index === 0 ? "Titik A" : "Titik B"}
+            text={index === 0 ? t.dimension.pointA : t.dimension.pointB}
             font="bold 12px Outfit, Inter, sans-serif"
             fillColor={Color.WHITE}
             outlineColor={Color.BLACK}
@@ -553,7 +555,7 @@ export default function CesiumViewerComponent() {
               text={
                 activeMeasurementMode === "ruler"
                   ? `${measuredData.diameter ?? 0} m`
-                  : `Selisih Ketinggian (Kedalaman): ${measuredData.depth ?? 0} m`
+                  : `${t.dimension.depthDifference}: ${measuredData.depth ?? 0} m`
               }
               font="bold 14px Outfit, Inter, sans-serif"
               fillColor={Color.YELLOW}

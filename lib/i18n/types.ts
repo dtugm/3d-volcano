@@ -59,6 +59,9 @@ export interface Translations {
     diameter: string;
     depth: string;
     volumeDelta: string;
+    pointA: string;
+    pointB: string;
+    depthDifference: string;
   };
   weather: {
     title: string;
