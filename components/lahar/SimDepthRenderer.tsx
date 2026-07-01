@@ -82,7 +82,7 @@ export default function SimDepthRenderer({
         data[j + 3] = 0;
         continue;
       }
-      const a = Math.min(255, ((d / maxD) * 220 + 30) | 0);
+      const a = Math.min(255, ((d / maxD) * 195 + 60) | 0);
       data[j] = r;
       data[j + 1] = g;
       data[j + 2] = b;

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import SectionHeader from "@/components/section-header";
 import { useLaharData } from "@/lib/lahar/hooks/use-lahar-data";
+import { useSimSnapshot } from "@/lib/lahar/snapshot-context";
 import { TerrainGrid } from "@/lib/lahar/terrain/grid";
 import { useVolcano } from "@/lib/volcano";
 
@@ -32,6 +33,7 @@ export default function LaharSimSection() {
     simRejection,
   } = useVolcano();
 
+  const simSnapshot = useSimSnapshot();
   const { data: laharData } = useLaharData(activeYearData?.laharData);
 
   useEffect(() => {
@@ -54,6 +56,18 @@ export default function LaharSimSection() {
     if (!simReady) return;
     simSetBudget(volumeInput.likely > 0 ? volumeInput.likely : null);
   }, [simReady, volumeInput.likely, simSetBudget]);
+
+  const stats = useMemo(() => {
+    if (!simSnapshot) return null;
+    return {
+      maxDepth: simSnapshot.maxDepth,
+      wettedCells: simSnapshot.wettedCells,
+      timeS: simSnapshot.timeS,
+      injectedM3: simSnapshot.injectedM3,
+      budgetM3: simSnapshot.budgetM3,
+      injecting: simSnapshot.injecting,
+    };
+  }, [simSnapshot]);
 
   if (!activeYearData?.laharData) return null;
 
@@ -115,6 +129,7 @@ export default function LaharSimSection() {
                   onPlay={() => setSimRunning(true)}
                   onPause={() => setSimRunning(false)}
                   onReset={simReset}
+                  stats={stats}
                 />
               </>
             )}
