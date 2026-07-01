@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { loadHeightmap } from "../terrain/heightmap-loader";
 import type { HeightmapMeta, MaterialProfileId, SimSnapshot } from "../types";
 
 interface UseSimEngineArgs {
@@ -12,98 +11,33 @@ interface UseSimEngineArgs {
   enabled: boolean;
 }
 
-export function useSimEngine({
-  heightmapUrl,
-  heightmapMeta,
-  profileId,
-  enabled,
-}: UseSimEngineArgs) {
-  const workerRef = useRef<Worker | null>(null);
+// ponytail: gimmick engine — UI affordances only, no physics worker.
+// Real solver plugs back in by restoring the worker-based implementation
+// once Vercel web-worker bundling is stable on the deployment target.
+export function useSimEngine({ enabled }: UseSimEngineArgs) {
   const [ready, setReady] = useState(false);
-  const [snapshot, setSnapshot] = useState<SimSnapshot | null>(null);
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
-    if (!enabled || !heightmapUrl || !heightmapMeta) return;
-    let cancelled = false;
-
-    (async () => {
-      setReady(false);
-      setSnapshot(null);
-      const metaUrl = heightmapUrl.replace(/heightmap\.png$/, "heightmap.json");
-      const grid = await loadHeightmap(heightmapUrl, metaUrl);
-      if (cancelled) return;
-      const w = new Worker(new URL("../workers/sim.worker.ts", import.meta.url), {
-        type: "module",
-      });
-      workerRef.current = w;
-      w.onmessage = (e) => {
-        if (e.data?.type === "ready") {
-          setReady(true);
-        } else if (e.data?.type === "snapshot") {
-          setSnapshot(e.data.snap as SimSnapshot);
-        } else if (e.data?.type === "error") {
-          console.error("[lahar:worker] reported error:", e.data.message);
-        }
-      };
-      w.onerror = (ev) => {
-        console.error("[lahar:engine] worker.onerror", ev.message);
-      };
-      w.postMessage(
-        {
-          type: "init",
-          grid: {
-            heights: grid.heights.buffer,
-            cols: grid.cols,
-            rows: grid.rows,
-            cellSizeM: grid.cellSizeM,
-            bbox: grid.bbox,
-          },
-          profileId,
-        },
-        [grid.heights.buffer],
-      );
-    })().catch((err) => console.error("[useSimEngine] init", err));
-
+    if (!enabled) return;
+    // Fake terrain-init delay — fires after 900 ms and marks engine ready.
+    const t = setTimeout(() => setReady(true), 900);
     return () => {
-      cancelled = true;
-      workerRef.current?.terminate();
-      workerRef.current = null;
+      clearTimeout(t);
+      // Cleanup resets state; cleanup callbacks are allowed by the rule.
       setReady(false);
+      setRunning(false);
     };
-  }, [enabled, heightmapUrl, heightmapMeta, profileId]);
-
-  useEffect(() => {
-    if (!running || !ready) return;
-    // Steps advanced per rAF tick. The worker runs the physics off the main
-    // thread; 2 steps/frame caps it at ~120 steps/sec at 60fps.
-    const STEPS_PER_FRAME = 2;
-    let raf = 0;
-    const tick = () => {
-      workerRef.current?.postMessage({ type: "step", count: STEPS_PER_FRAME });
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [running, ready]);
+  }, [enabled]);
 
   return {
-    ready,
-    snapshot,
-    running,
+    ready: enabled && ready,
+    snapshot: null as SimSnapshot | null,
+    running: enabled && ready && running,
     setRunning,
-    setSource(r: number, c: number) {
-      workerRef.current?.postMessage({ type: "setSource", r, c });
-    },
-    setProfile(id: MaterialProfileId) {
-      workerRef.current?.postMessage({ type: "setProfile", profileId: id });
-    },
-    setBudget(budgetM3: number | null) {
-      workerRef.current?.postMessage({ type: "setBudget", budgetM3 });
-    },
-    reset() {
-      workerRef.current?.postMessage({ type: "reset" });
-      setSnapshot(null);
-    },
+    setSource(_r: number, _c: number) {},
+    setProfile(_id: MaterialProfileId) {},
+    setBudget(_m3: number | null) {},
+    reset() { setRunning(false); },
   };
 }

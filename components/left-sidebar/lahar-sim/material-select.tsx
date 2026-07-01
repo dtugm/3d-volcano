@@ -1,8 +1,14 @@
 "use client";
 
-import { useTranslation } from "@/lib/i18n/useTranslation";
 import { profilesByKind } from "@/lib/lahar/materials";
 import type { MaterialProfileId } from "@/lib/lahar/types";
+
+const LABELS: Record<string, string> = {
+  laharWet: "Lahar (wet)",
+  laharDry: "Lahar (dry)",
+  lavaBasaltic: "Lava (basaltic)",
+  lavaAndesitic: "Lava (andesitic)",
+};
 
 interface Props {
   kind: "lahar" | "lava";
@@ -11,10 +17,9 @@ interface Props {
 }
 
 export default function MaterialSelect({ kind, value, onChange }: Props) {
-  const { t } = useTranslation();
   return (
     <label className="flex flex-col gap-1 text-xs">
-      <span className="text-slate-500 dark:text-slate-400">{t.simulation.material}</span>
+      <span className="text-slate-500 dark:text-slate-400">Material</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as MaterialProfileId)}
@@ -22,7 +27,7 @@ export default function MaterialSelect({ kind, value, onChange }: Props) {
       >
         {profilesByKind(kind).map((p) => (
           <option key={p.id} value={p.id}>
-            {t.simulation.materialOptions[p.id as keyof typeof t.simulation.materialOptions]}
+            {LABELS[p.id] ?? p.id}
           </option>
         ))}
       </select>
