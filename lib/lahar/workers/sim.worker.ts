@@ -1,9 +1,9 @@
 /// <reference lib="webworker" />
-import { getProfile } from "@/lib/lahar/materials";
-import { SNAPSHOT_MIN_MS } from "@/lib/lahar/sim/constants";
-import { FluidEngine } from "@/lib/lahar/sim/engine";
-import { TerrainGrid } from "@/lib/lahar/terrain/grid";
-import type { MaterialProfileId } from "@/lib/lahar/types";
+import { getProfile } from "../materials";
+import { SNAPSHOT_MIN_MS } from "../sim/constants";
+import { FluidEngine } from "../sim/engine";
+import { TerrainGrid } from "../terrain/grid";
+import type { MaterialProfileId } from "../types";
 
 type InMsg =
   | {
