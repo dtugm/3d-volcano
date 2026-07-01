@@ -9,9 +9,12 @@
     "build": "pnpm run copy-cesium && next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "pnpm run copy-cesium"
+    "postinstall": "pnpm run copy-cesium",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@turf/turf": "^7.3.5",
     "cesium": "^1.137.0",
     "geotiff": "^3.0.5",
     "next": "16.1.4",
@@ -25,15 +28,23 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^20",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.183.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/ui": "^2.1.9",
     "cpx2": "^8.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
     "eslint-plugin-simple-import-sort": "^12.1.1",
+    "jsdom": "^29.1.1",
+    "pngjs": "^7.0.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.21.0",
+    "typescript": "^5",
+    "vitest": "^2"
   }
 }

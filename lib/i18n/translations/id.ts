@@ -44,6 +44,28 @@ export const id: Translations = {
     gas: "Gas",
     deformation: "Deformasi",
   },
+  simulation: {
+    title: "Simulasi Lahar/Lava",
+    mode: { off: "Off", lahar: "Lahar", lava: "Lava" },
+    material: "Material",
+    materialOptions: {
+      laharWet: "Lahar (basah)",
+      laharDry: "Lahar (kering)",
+      lavaBasaltic: "Lava (basaltik)",
+      lavaAndesitic: "Lava (andesitik)",
+    },
+    volume: { min: "Min", likely: "Perkiraan", max: "Maks", unit: "m³" },
+    promptClick: "Klik pada aliran sungai untuk titik awal",
+    rejection: {
+      outsideStream: "Klik di luar aliran lahar",
+      belowHazardCone: "Klik di luar zona bahaya proksimal",
+      notInDeposition: "Klik di luar area deposisi",
+      notAtJunction:
+        "Klik tidak dekat dengan titik awal lahar (junction) terdekat",
+    },
+    controls: { play: "Mulai", pause: "Jeda", reset: "Reset" },
+    stats: { maxDepth: "Kedalaman maks", wettedCells: "Sel terendam", simTime: "Waktu simulasi" },
+  },
   basemap: {
     title: "Peta Dasar",
     osm: "OpenStreetMap",

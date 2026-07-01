@@ -1,8 +1,11 @@
+import type { LaharDataRef } from "@/lib/lahar/types";
+
 export interface YearData {
   tilesetUrl?: string;
   terrainUrl?: string;
   orthoUrl?: string;
   gaussianSplatUrl?: string;
+  laharData?: LaharDataRef;
 }
 
 export interface CraterDetails {
@@ -71,6 +74,16 @@ export const MOUNTAINS: Mountain[] = [
         orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-agung/2020",
         gaussianSplatUrl:
           "https://bucket.dt-volcano.geo-ai.id/GaussianSplat/gunung-agung/2020/tileset.json",
+        laharData: {
+          baseUrl: "/lahar-test-data/gunung-agung/2020",
+          mainstem: "mainstem.geojson",
+          branches: "branches.geojson",
+          deposition: "deposition.geojson",
+          hazardCone: "hazardCone.geojson",
+          lspCandidates: "lspCandidates.geojson",
+          heightmap: "heightmap.png",
+          heightmapMeta: "heightmap.json",
+        },
       },
     },
     craterDetails: {
@@ -100,6 +113,16 @@ export const MOUNTAINS: Mountain[] = [
         orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-kelud/2014",
         gaussianSplatUrl:
           "https://bucket.dt-volcano.geo-ai.id/GaussianSplat/gunung-kelud/2014/tileset.json",
+        laharData: {
+          baseUrl: "/lahar-test-data/gunung-kelud/2014",
+          mainstem: "mainstem.geojson",
+          branches: "branches.geojson",
+          deposition: "deposition.geojson",
+          hazardCone: "hazardCone.geojson",
+          lspCandidates: "lspCandidates.geojson",
+          heightmap: "heightmap.png",
+          heightmapMeta: "heightmap.json",
+        },
       },
       "2026": {
         terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-kelud/2026",

@@ -4,44 +4,52 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 
 import {
   ArcGisMapServerImageryProvider,
+  Cartesian2,
   Cartesian3,
+  Cartographic,
   Cesium3DTileset as Cesium3DTilesetType,
   CesiumTerrainProvider,
+  Color,
   EllipsoidTerrainProvider,
   HeadingPitchRange,
   ImageryLayer as CesiumImageryLayer,
   ImageryProvider,
   Ion,
   IonImageryProvider,
+  LabelStyle,
   Math as CesiumMath,
   OpenStreetMapImageryProvider,
+  ScreenSpaceEventType,
   SplitDirection,
   TerrainProvider,
   TileMapServiceImageryProvider,
   Viewer as CesiumViewer,
-  Color,
-  LabelStyle,
-  Cartesian2,
-  Cartographic,
-  ScreenSpaceEventType,
 } from "cesium";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Cesium3DTileset,
   CesiumComponentRef,
-  ImageryLayer,
-  Viewer,
+  EllipseGraphics,
   Entity,
+  ImageryLayer,
+  LabelGraphics,
   PointGraphics,
   PolylineGraphics,
-  LabelGraphics,
-  EllipseGraphics,
-  ScreenSpaceEventHandler,
   ScreenSpaceEvent,
+  ScreenSpaceEventHandler,
+  Viewer,
 } from "resium";
 
 import FpsOverlay from "@/components/fps-overlay";
+import LaharzEnvelope from "@/components/lahar/LaharzEnvelope";
+import SimDepthRenderer from "@/components/lahar/SimDepthRenderer";
+import SimParticleRenderer from "@/components/lahar/SimParticleRenderer";
+import SimSourcePicker from "@/components/lahar/SimSourcePicker";
+import StreamRenderer from "@/components/lahar/StreamRenderer";
 import { useTranslation } from "@/lib/i18n";
+import { useLaharData } from "@/lib/lahar";
+import { getProfile } from "@/lib/lahar/materials";
+import { useSimSnapshot } from "@/lib/lahar/snapshot-context";
 import { useVolcano } from "@/lib/volcano";
 
 declare global {
@@ -84,6 +92,10 @@ export default function CesiumViewerComponent() {
     comparisonLeftYearData,
     comparisonRightYearData,
     basemap,
+    simulationMode,
+    materialProfile,
+    selectedLSP,
+    volumeInput,
     activeMeasurementMode,
     measuredData,
     setMeasuredData,
@@ -91,6 +103,9 @@ export default function CesiumViewerComponent() {
     simulationWaterLevel,
     simulationType,
   } = useVolcano();
+  const simSnapshot = useSimSnapshot();
+  const { data: laharData } = useLaharData(activeYearData?.laharData);
+  const materialProfileObj = getProfile(materialProfile);
   const previousMountainIdRef = useRef<string | null>(null);
   const previousYearRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
@@ -504,6 +519,45 @@ export default function CesiumViewerComponent() {
           onReady={handleTilesetReady}
         />
       )}
+      {simulationMode !== "off" && laharData ? (
+        <SimSourcePicker
+          viewer={viewerRef.current?.cesiumElement ?? null}
+          data={laharData}
+        />
+      ) : null}
+      {simulationMode !== "off" && laharData ? (
+        <StreamRenderer
+          viewer={viewerRef.current?.cesiumElement ?? null}
+          mainstem={laharData.mainstem}
+          branches={laharData.branches}
+          lspCandidates={laharData.lspCandidates}
+          selectedLSP={selectedLSP}
+        />
+      ) : null}
+      {simulationMode !== "off" && laharData ? (
+        <SimDepthRenderer
+          viewer={viewerRef.current?.cesiumElement ?? null}
+          bbox={laharData.heightmapMeta.bbox}
+          snapshot={simSnapshot}
+          rgb={materialProfileObj.color}
+        />
+      ) : null}
+      {simulationMode === "lava" && laharData ? (
+        <SimParticleRenderer
+          viewer={viewerRef.current?.cesiumElement ?? null}
+          meta={laharData.heightmapMeta}
+          snapshot={simSnapshot}
+          rgb={materialProfileObj.color}
+        />
+      ) : null}
+      {simulationMode !== "off" && selectedLSP ? (
+        <LaharzEnvelope
+          viewer={viewerRef.current?.cesiumElement ?? null}
+          origin={selectedLSP}
+          volume={volumeInput}
+          profile={materialProfileObj}
+        />
+      ) : null}
 
       {/* Screen-space handler for picking measurement coordinates */}
       {activeMeasurementMode !== "none" && (
@@ -549,7 +603,6 @@ export default function CesiumViewerComponent() {
             width={4}
             material={Color.YELLOW}
           />
-          {/* Bold midpoint text indicator overlay */}
           <Entity position={Cartesian3.midpoint(clickedPoints[0], clickedPoints[1], new Cartesian3())}>
             <LabelGraphics
               text={

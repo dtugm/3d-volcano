@@ -1,6 +1,6 @@
 "use client";
-import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import React, { useRef, useState } from "react";
 
 import { useTranslation } from "@/lib/i18n";

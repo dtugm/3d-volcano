@@ -44,6 +44,28 @@ export const en: Translations = {
     gas: "Gas",
     deformation: "Deformation",
   },
+  simulation: {
+    title: "Lahar/Lava Simulation",
+    mode: { off: "Off", lahar: "Lahar", lava: "Lava" },
+    material: "Material",
+    materialOptions: {
+      laharWet: "Lahar (wet)",
+      laharDry: "Lahar (dry)",
+      lavaBasaltic: "Lava (basaltic)",
+      lavaAndesitic: "Lava (andesitic)",
+    },
+    volume: { min: "Min", likely: "Likely", max: "Max", unit: "m³" },
+    promptClick: "Click on a stream to set the starting point",
+    rejection: {
+      outsideStream: "Click is outside any lahar stream",
+      belowHazardCone: "Click is outside the proximal hazard zone",
+      notInDeposition: "Click is outside the deposition area",
+      notAtJunction:
+        "Click is not near any precomputed lahar starting point (junction)",
+    },
+    controls: { play: "Play", pause: "Pause", reset: "Reset" },
+    stats: { maxDepth: "Max depth", wettedCells: "Wetted cells", simTime: "Sim time" },
+  },
   basemap: {
     title: "Basemap",
     osm: "OpenStreetMap",
