@@ -20,37 +20,37 @@ export const EPOCHS: EpochInfo[] = [
   {
     id: "T1",
     label: "T1: Oct 17, 2017",
-    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/T1.tif",
+    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/Agung/T1.tif",
     color: EPOCH_COLORS[0],
   },
   {
     id: "T2",
     label: "T2: Oct 20, 2017",
-    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/T2.tif",
+    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/Agung/T2.tif",
     color: EPOCH_COLORS[1],
   },
   {
     id: "T3",
     label: "T3: Oct 21, 2017",
-    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/T3.tif",
+    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/Agung/T3.tif",
     color: EPOCH_COLORS[2],
   },
   {
     id: "T4",
     label: "T4: Dec 16, 2017",
-    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/T4.tif",
+    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/Agung/T4.tif",
     color: EPOCH_COLORS[3],
   },
   {
     id: "T5",
     label: "T5: July 6, 2019",
-    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/T5.tif",
+    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/Agung/T5.tif",
     color: EPOCH_COLORS[4],
   },
   {
     id: "T6",
     label: "T6: Juli 2020",
-    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/T6.tif",
+    url: "https://bucket.dt-volcano.geo-ai.id/Half3D/Agung/T6.tif",
     color: EPOCH_COLORS[5],
   },
 ];

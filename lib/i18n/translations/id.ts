@@ -78,6 +78,9 @@ export const id: Translations = {
     diameter: "Diameter",
     depth: "Kedalaman",
     volumeDelta: "Volume Δ",
+    pointA: "Titik A",
+    pointB: "Titik B",
+    depthDifference: "Selisih Ketinggian (Kedalaman)",
   },
   weather: {
     title: "Cuaca",

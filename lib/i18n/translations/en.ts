@@ -78,6 +78,9 @@ export const en: Translations = {
     diameter: "Diameter",
     depth: "Depth",
     volumeDelta: "Volume Δ",
+    pointA: "Point A",
+    pointB: "Point B",
+    depthDifference: "Height Difference (Depth)",
   },
   weather: {
     title: "Weather",

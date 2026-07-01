@@ -111,6 +111,8 @@ export const MOUNTAINS: Mountain[] = [
       "2014": {
         terrainUrl: "https://bucket.dt-volcano.geo-ai.id/DTM/gunung-kelud/2014",
         orthoUrl: "https://bucket.dt-volcano.geo-ai.id/ORTHO/gunung-kelud/2014",
+        gaussianSplatUrl:
+          "https://bucket.dt-volcano.geo-ai.id/GaussianSplat/gunung-kelud/2014/tileset.json",
         laharData: {
           baseUrl: "/lahar-test-data/gunung-kelud/2014",
           mainstem: "mainstem.geojson",
