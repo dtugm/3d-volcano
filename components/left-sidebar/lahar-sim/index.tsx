@@ -5,6 +5,7 @@ import { useEffect, useMemo } from "react";
 import SectionHeader from "@/components/section-header";
 import { useTranslation } from "@/lib/i18n/useTranslation";
 import { useLaharData } from "@/lib/lahar/hooks/use-lahar-data";
+import { useSimSnapshot } from "@/lib/lahar/snapshot-context";
 import { TerrainGrid } from "@/lib/lahar/terrain/grid";
 import { useVolcano } from "@/lib/volcano";
 
@@ -23,7 +24,6 @@ export default function LaharSimSection() {
     volumeInput,
     setVolumeInput,
     activeYearData,
-    simSnapshot,
     simReady,
     simRunning,
     setSimRunning,
@@ -33,6 +33,7 @@ export default function LaharSimSection() {
     simRejection,
   } = useVolcano();
 
+  const simSnapshot = useSimSnapshot();
   const { data: laharData } = useLaharData(activeYearData?.laharData);
 
   useEffect(() => {

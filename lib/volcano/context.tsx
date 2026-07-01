@@ -11,11 +11,11 @@ import {
 
 import { useLaharData } from "@/lib/lahar/hooks/use-lahar-data";
 import { useSimEngine } from "@/lib/lahar/hooks/use-sim-engine";
+import { SimSnapshotProvider } from "@/lib/lahar/snapshot-context";
 import type {
   LSPCandidate,
   LSPRejection,
   MaterialProfileId,
-  SimSnapshot,
   SimStatus,
   SimulationMode,
   VolumeTriple,
@@ -71,7 +71,6 @@ interface VolcanoContextValue {
   setSimStatus: (s: SimStatus) => void;
   simRejection: LSPRejection | null;
   setSimRejection: (r: LSPRejection | null) => void;
-  simSnapshot: SimSnapshot | null;
   simReady: boolean;
   simRunning: boolean;
   setSimRunning: (running: boolean) => void;
@@ -297,7 +296,6 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
         setSimStatus,
         simRejection,
         setSimRejection,
-        simSnapshot: sim.snapshot,
         simReady: sim.ready,
         simRunning: sim.running,
         setSimRunning: sim.setRunning,
@@ -316,7 +314,9 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
         setSimulationType,
       }}
     >
-      {children}
+      <SimSnapshotProvider snapshot={sim.snapshot}>
+        {children}
+      </SimSnapshotProvider>
     </VolcanoContext.Provider>
   );
 }

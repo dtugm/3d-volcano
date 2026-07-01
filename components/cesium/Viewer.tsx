@@ -48,6 +48,7 @@ import SimSourcePicker from "@/components/lahar/SimSourcePicker";
 import StreamRenderer from "@/components/lahar/StreamRenderer";
 import { useLaharData } from "@/lib/lahar";
 import { getProfile } from "@/lib/lahar/materials";
+import { useSimSnapshot } from "@/lib/lahar/snapshot-context";
 import { useVolcano } from "@/lib/volcano";
 
 declare global {
@@ -93,7 +94,6 @@ export default function CesiumViewerComponent() {
     materialProfile,
     selectedLSP,
     volumeInput,
-    simSnapshot,
     activeMeasurementMode,
     measuredData,
     setMeasuredData,
@@ -101,6 +101,7 @@ export default function CesiumViewerComponent() {
     simulationWaterLevel,
     simulationType,
   } = useVolcano();
+  const simSnapshot = useSimSnapshot();
   const { data: laharData } = useLaharData(activeYearData?.laharData);
   const materialProfileObj = getProfile(materialProfile);
   const previousMountainIdRef = useRef<string | null>(null);
