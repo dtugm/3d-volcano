@@ -58,6 +58,13 @@ interface VolcanoContextValue {
   setSimulationWaterLevel: (level: number) => void;
   simulationType: SimulationType;
   setSimulationType: (type: SimulationType) => void;
+  // Land Surface Temperature overlay (served by the sensor API)
+  lstEnabled: boolean;
+  setLstEnabled: (enabled: boolean) => void;
+  lstOpacity: number;
+  setLstOpacity: (opacity: number) => void;
+  lstDate: string;
+  setLstDate: (date: string) => void;
 }
 
 export interface LayerVisibility {
@@ -101,6 +108,11 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
     MOUNTAINS[0].craterDetails?.floorElevation || 2780
   );
   const [simulationType, setSimulationType] = useState<SimulationType>("water");
+
+  // LST overlay state; the date is filled in by useLst from /lst/dates.
+  const [lstEnabled, setLstEnabled] = useState(false);
+  const [lstOpacity, setLstOpacity] = useState(0.7);
+  const [lstDate, setLstDate] = useState<string>("");
 
   const activeMountain = MOUNTAINS.find((m) => m.id === activeMountainId);
 
@@ -226,6 +238,12 @@ export function VolcanoProvider({ children }: { children: ReactNode }) {
         setSimulationWaterLevel,
         simulationType,
         setSimulationType,
+        lstEnabled,
+        setLstEnabled,
+        lstOpacity,
+        setLstOpacity,
+        lstDate,
+        setLstDate,
       }}
     >
       {children}

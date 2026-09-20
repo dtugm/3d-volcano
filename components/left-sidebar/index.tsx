@@ -10,6 +10,7 @@ import { PanelIcon } from "../icons";
 import SectionHeader from "../section-header";
 import DimensionSection from "./dimension";
 import DisplayModeSection from "./display-mode";
+import LstSection from "./lst";
 import MountainList from "./mountain-list";
 import ResearchInfo from "./research-box";
 import SensorSection from "./sensor";
@@ -115,6 +116,7 @@ const LeftSideBar = () => {
             />
             <DisplayModeSection />
             <TimeSeriesSection dates={timeSeriesDates} />
+            <LstSection />
             {/* <div className="pointer-events-none opacity-50 flex flex-col gap-4">
               <SensorSection />
             </div> */}

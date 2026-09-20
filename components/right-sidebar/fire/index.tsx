@@ -7,12 +7,12 @@ import {
   RefreshCwIcon,
 } from "@/components/icons";
 import SectionHeader from "@/components/section-header";
-import { useTranslation } from "@/lib/i18n";
 import { useFire } from "@/lib/hooks/use-fire";
+import { useTranslation } from "@/lib/i18n";
 
 const FirePanel = () => {
   const { t } = useTranslation();
-  const { fire, error, isLoading, refresh } = useFire();
+  const { fire, windowDays, error, isLoading, refresh } = useFire();
 
   if (isLoading) {
     return (
@@ -74,7 +74,7 @@ const FirePanel = () => {
               style={{ color: "#52A869" }}
             />
             <p className="text-xs text-slate-600 dark:text-slate-300">
-              {t.fire.noHotspots}
+              {t.fire.noHotspots} ({windowDays} {t.fire.lastDays})
             </p>
           </div>
         </div>
@@ -109,8 +109,8 @@ const FirePanel = () => {
                   value={`${hotspot.frp.toFixed(1)} MW`}
                 />
                 <MetricRow
-                  label={t.fire.confidence}
-                  value={hotspot.confidence}
+                  label={t.fire.instrument}
+                  value={hotspot.instrument}
                 />
                 <MetricRow
                   label={t.fire.distance}

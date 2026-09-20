@@ -31,14 +31,27 @@ export interface Hotspot {
   longitude: number;
   brightness: number;
   frp: number;
-  confidence: string;
   satellite: string;
+  instrument: string;
   acqDate: string;
   acqTime: string;
-  daynight: string;
   distanceKm: number;
 }
 
 export interface FireData {
   hotspots: Hotspot[];
+}
+
+export interface EarthquakeEvent {
+  id: string;
+  magnitude: number;
+  magType: string;
+  place: string;
+  /** Epoch milliseconds. */
+  time: number;
+  url: string;
+  latitude: number;
+  longitude: number;
+  depthKm: number;
+  distanceKm: number;
 }

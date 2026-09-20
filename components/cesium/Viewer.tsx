@@ -18,11 +18,13 @@ import {
   SplitDirection,
   TerrainProvider,
   TileMapServiceImageryProvider,
+  UrlTemplateImageryProvider,
   Viewer as CesiumViewer,
   Color,
   LabelStyle,
   Cartesian2,
   Cartographic,
+  Rectangle,
   ScreenSpaceEventType,
 } from "cesium";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -41,7 +43,13 @@ import {
 } from "resium";
 
 import FpsOverlay from "@/components/fps-overlay";
+import { useLst } from "@/lib/hooks/use-lst";
 import { useTranslation } from "@/lib/i18n";
+import {
+  LST_FOOTPRINT_DEG,
+  LST_MAX_ZOOM,
+  LST_MIN_ZOOM,
+} from "@/lib/sensor-api";
 import { useVolcano } from "@/lib/volcano";
 
 declare global {
@@ -90,7 +98,10 @@ export default function CesiumViewerComponent() {
     isSimulatingVolume,
     simulationWaterLevel,
     simulationType,
+    lstEnabled,
+    lstOpacity,
   } = useVolcano();
+  const { tileUrl: lstTileUrl } = useLst();
   const previousMountainIdRef = useRef<string | null>(null);
   const previousYearRef = useRef<string | null>(null);
   const isInitialLoadRef = useRef(true);
@@ -109,6 +120,25 @@ export default function CesiumViewerComponent() {
   const [rightOrthoProvider, setRightOrthoProvider] =
     useState<ImageryProvider | null>(null);
   const baseLayerRef = useRef<CesiumImageryLayer | null>(null);
+
+  // LST is a plain XYZ pyramid covering one volcano at zoom 5-12. Both the zoom
+  // bounds and the rectangle are required: without the rectangle Cesium assumes
+  // global coverage, which at LST_MIN_ZOOM means far too many tiles, and the
+  // layer silently never requests anything.
+  const lstImageryProvider = useMemo(() => {
+    if (!lstTileUrl || !activeMountain) return null;
+    return new UrlTemplateImageryProvider({
+      url: lstTileUrl,
+      minimumLevel: LST_MIN_ZOOM,
+      maximumLevel: LST_MAX_ZOOM,
+      rectangle: Rectangle.fromDegrees(
+        activeMountain.longitude - LST_FOOTPRINT_DEG,
+        activeMountain.latitude - LST_FOOTPRINT_DEG,
+        activeMountain.longitude + LST_FOOTPRINT_DEG,
+        activeMountain.latitude + LST_FOOTPRINT_DEG,
+      ),
+    });
+  }, [lstTileUrl, activeMountain]);
 
   const [clickedPoints, setClickedPoints] = useState<Cartesian3[]>([]);
 
@@ -489,6 +519,9 @@ export default function CesiumViewerComponent() {
       )}
       {!comparisonEnabled && layerVisibility.ortho && orthoImageryProvider && (
         <ImageryLayer imageryProvider={orthoImageryProvider} />
+      )}
+      {lstEnabled && lstImageryProvider && (
+        <ImageryLayer imageryProvider={lstImageryProvider} alpha={lstOpacity} />
       )}
       {layerVisibility.tiles3d && activeYearData?.tilesetUrl && (
         <Cesium3DTileset

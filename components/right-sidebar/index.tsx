@@ -4,6 +4,7 @@ import { useCallback, useEffect, useSyncExternalStore } from "react";
 
 import { PanelIcon } from "../icons";
 import AirQualityPanel from "./air-quality";
+import EarthquakePanel from "./earthquake";
 import FirePanel from "./fire";
 import WeatherPanel from "./weather";
 
@@ -71,6 +72,7 @@ const RightSidebar = () => {
           <WeatherPanel />
           <AirQualityPanel />
           <FirePanel />
+          <EarthquakePanel />
         </div>
       )}
     </div>

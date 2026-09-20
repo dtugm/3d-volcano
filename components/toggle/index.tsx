@@ -7,6 +7,7 @@ interface ToggleProps {
   onChange: (checked: boolean) => void;
   label?: React.ReactNode;
   activeColor?: string;
+  disabled?: boolean;
 }
 
 const Toggle: React.FC<ToggleProps> = ({
@@ -14,9 +15,12 @@ const Toggle: React.FC<ToggleProps> = ({
   onChange,
   label,
   activeColor = "#4285F4",
+  disabled = false,
 }) => {
   return (
-    <label className="flex items-center justify-between cursor-pointer">
+    <label
+      className={`flex items-center justify-between ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+    >
       {label && (
         <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">
           {label}
@@ -27,6 +31,7 @@ const Toggle: React.FC<ToggleProps> = ({
           type="checkbox"
           className="sr-only peer"
           checked={checked}
+          disabled={disabled}
           onChange={(e) => onChange(e.target.checked)}
         />
         <div

@@ -87,10 +87,30 @@ export interface Translations {
     noHotspots: string;
     brightness: string;
     frp: string;
-    confidence: string;
     satellite: string;
+    instrument: string;
     distance: string;
     detected: string;
+    lastDays: string;
+  };
+  earthquake: {
+    title: string;
+    events: string;
+    noEvents: string;
+    magnitude: string;
+    depth: string;
+    distance: string;
+    recorded: string;
+    lastDays: string;
+  };
+  lst: {
+    title: string;
+    show: string;
+    date: string;
+    opacity: string;
+    legend: string;
+    noDates: string;
+    description: string;
   };
 }
 
