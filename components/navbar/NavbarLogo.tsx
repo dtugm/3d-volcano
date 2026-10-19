@@ -1,27 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 
+import { VolcanoLogo } from "@/components/site/VolcanoLogo";
 import { useTranslation } from "@/lib/i18n";
-
-import { EarthIcon } from "../icons";
 
 export const NavbarLogo: React.FC = () => {
   const { t } = useTranslation();
-
   return (
-    <div className="flex items-center gap-3">
-      <div className="w-10 h-10 bg-[#4285F4] rounded-xl flex items-center justify-center">
-        <EarthIcon className="w-6 h-6 text-white" aria-hidden="true" />
-      </div>
-      <div>
-        <h1 className="text-base font-bold text-slate-900 dark:text-white">
-          {t.navbar.title}
-        </h1>
-        <p className="text-xs text-slate-600 dark:text-slate-400">
-          {t.navbar.subtitle}
-        </p>
-      </div>
-    </div>
+    <Link href="/" className="flex items-center gap-2.5 rounded-full" aria-label={t.nav.home}>
+      <VolcanoLogo className="h-9 w-10 shrink-0 text-brand" />
+      <span className="hidden leading-tight sm:block">
+        <span className="block text-[14px] font-extrabold text-ink">{t.navbar.title}</span>
+        <span className="block text-[11px] font-medium text-muted">Geo-AIT · UGM</span>
+      </span>
+    </Link>
   );
 };

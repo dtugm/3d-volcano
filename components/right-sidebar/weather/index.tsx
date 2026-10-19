@@ -1,10 +1,13 @@
 "use client";
 
-import { CloudIcon, NavigationIcon, RefreshCwIcon } from "@/components/icons";
-import SectionHeader from "@/components/section-header";
+import { NavigationIcon } from "@/components/icons";
+import { DesignIcon } from "@/components/site/DesignIcon";
+import { Panel } from "@/components/site/ui";
 import { useWeather } from "@/lib/hooks/use-weather";
 import { useTranslation } from "@/lib/i18n";
 import type { AltitudeLayer } from "@/lib/types/api";
+
+import { PanelError, PanelSkeleton } from "../shared";
 
 const COMPASS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"] as const;
 
@@ -33,132 +36,111 @@ function weatherEmoji(code: number): string {
   return "☁️";
 }
 
-const WeatherPanel = () => {
+const WeatherPanel = ({ id }: { id?: string }) => {
   const { t } = useTranslation();
   const { weather, error, isLoading, refresh } = useWeather();
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        <SectionHeader
-          name={t.weather.title}
-          icon={
-            <CloudIcon className="w-3.5 h-3.5 text-slate-500 dark:text-[#90A1B9]" />
-          }
-        />
-        <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 animate-pulse">
-          <div className="space-y-3">
-            {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className="h-6 bg-slate-200 dark:bg-slate-700 rounded"
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      <Panel id={id} title={t.weather.title}>
+        <PanelSkeleton rows={4} hero />
+      </Panel>
     );
   }
 
   if (error || !weather) {
     return (
-      <div className="space-y-3">
-        <SectionHeader
-          name={t.weather.title}
-          icon={
-            <CloudIcon className="w-3.5 h-3.5 text-slate-500 dark:text-[#90A1B9]" />
-          }
-        />
-        <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t.common.error}
-          </p>
-          <button
-            onClick={() => refresh()}
-            className="mt-2 flex items-center gap-1 text-xs text-[#4285F4] hover:underline cursor-pointer"
-          >
-            <RefreshCwIcon className="w-3 h-3" />
-            Retry
-          </button>
-        </div>
-      </div>
+      <Panel id={id} title={t.weather.title}>
+        <PanelError message={t.common.error} onRetry={() => refresh()} />
+      </Panel>
     );
   }
 
-  const layers = [...weather.layers].reverse();
+  // Lowest (near-ground) layer is the headline; the rest are listed by altitude.
+  const layers = [...weather.layers].sort((a, b) => a.approxAltitudeM - b.approxAltitudeM);
+  const [ground, ...rest] = layers;
 
   return (
-    <div className="space-y-3">
-      <SectionHeader
-        name={t.weather.title}
-        icon={
-          <CloudIcon className="w-3.5 h-3.5 text-slate-500 dark:text-[#90A1B9]" />
-        }
-      />
-
-      <div className="space-y-2">
-        {layers.map((layer) => (
-          <LayerCard key={layer.pressureHpa} layer={layer} t={t} />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-interface LayerCardProps {
-  layer: AltitudeLayer;
-  t: ReturnType<typeof useTranslation>["t"];
-}
-
-const LayerCard: React.FC<LayerCardProps> = ({ layer, t }) => {
-  const emoji = weatherEmoji(layer.weatherCode);
-
-  return (
-    <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3">
-      {/* Row 1: Altitude + weather emoji | Temperature */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-sm leading-none">{emoji}</span>
-          <div>
-            <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 tabular-nums">
-              {t.common.height} {formatAltitude(layer.approxAltitudeM)}
+    <Panel id={id} title={t.weather.title}>
+      {ground && (
+        <div className="mb-3">
+          <div className="flex items-center gap-3">
+            <span className="text-[44.8px] leading-[58px] font-bold tracking-[-1.73px] text-ink tabular-nums">
+              {Math.round(ground.temperature)}°C
             </span>
-            <span className="text-[10px] text-slate-400 ml-1.5 tabular-nums">
-              {layer.pressureHpa} hPa
+            <span className="text-[34px] leading-none" aria-hidden>
+              {weatherEmoji(ground.weatherCode)}
             </span>
           </div>
+          <p className="text-[12px] text-muted tabular-nums">
+            {t.common.height} {formatAltitude(ground.approxAltitudeM)} · {ground.pressureHpa} hPa
+          </p>
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1">
+            <WindReading layer={ground} />
+            <HumidityReading layer={ground} label={t.weather.humidity} />
+          </div>
         </div>
-        <div className="text-base font-bold text-slate-800 dark:text-slate-200 tabular-nums">
-          {Math.round(layer.temperature)}°C
-        </div>
-      </div>
+      )}
 
-      {/* Row 2: Wind + Humidity */}
-      <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-700/50">
-        <div className="flex items-center gap-1">
-          <NavigationIcon
-            className="w-3 h-3 text-slate-400"
-            style={{ transform: `rotate(${layer.windDirection}deg)` }}
-          />
-          <span className="text-[11px] text-slate-600 dark:text-slate-300 tabular-nums">
-            {layer.windSpeed.toFixed(1)} m/s
-          </span>
-          <span className="text-[10px] text-slate-400 tabular-nums">
-            {degToCompass(layer.windDirection)} (
-            {Math.round(layer.windDirection)}°)
-          </span>
+      {rest.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          {rest.map((layer) => (
+            <div
+              key={layer.pressureHpa}
+              className="flex items-center justify-between gap-2 rounded-xl bg-canvas px-3 py-2 text-[13px]"
+            >
+              <span className="flex w-[64px] shrink-0 items-center gap-1.5">
+                <span className="text-[13px] leading-none" aria-hidden>
+                  {weatherEmoji(layer.weatherCode)}
+                </span>
+                <span className="font-semibold text-ink tabular-nums" title={`${layer.pressureHpa} hPa`}>
+                  {formatAltitude(layer.approxAltitudeM)}
+                </span>
+              </span>
+              <WindReading layer={layer} compact />
+              <HumidityReading layer={layer} label={t.weather.humidity} compact />
+              <span className="w-[42px] shrink-0 text-right font-bold text-ink tabular-nums">
+                {Math.round(layer.temperature)}°
+              </span>
+            </div>
+          ))}
         </div>
-        <div className="flex items-center gap-1">
-          <span className="text-[10px] text-slate-400">
-            {t.weather.humidity}
-          </span>
-          <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300 tabular-nums">
-            {Math.round(layer.humidity)}%
-          </span>
-        </div>
-      </div>
-    </div>
+      )}
+    </Panel>
   );
 };
+
+function WindReading({ layer, compact }: { layer: AltitudeLayer; compact?: boolean }) {
+  return (
+    <span
+      className="flex items-center gap-1 text-[13px] text-ink-body tabular-nums"
+      title={`${degToCompass(layer.windDirection)} (${Math.round(layer.windDirection)}°)`}
+    >
+      <NavigationIcon
+        className="size-[13px] shrink-0 text-brand"
+        style={{ transform: `rotate(${layer.windDirection}deg)` }}
+      />
+      {layer.windSpeed.toFixed(1)}
+      <span className="text-muted">m/s</span>
+      {compact ? (
+        <span className="text-[11.5px] text-muted">{degToCompass(layer.windDirection)}</span>
+      ) : (
+        <span className="text-[11.5px] text-muted">
+          {degToCompass(layer.windDirection)} ({Math.round(layer.windDirection)}°)
+        </span>
+      )}
+    </span>
+  );
+}
+
+function HumidityReading({ layer, label, compact }: { layer: AltitudeLayer; label: string; compact?: boolean }) {
+  return (
+    <span className="flex items-center gap-1 text-[13px] text-ink-body tabular-nums" title={label}>
+      <DesignIcon name="wxHumidity" size={15} className="text-muted" />
+      {!compact && <span className="text-muted">{label}</span>}
+      {Math.round(layer.humidity)}%
+    </span>
+  );
+}
 
 export default WeatherPanel;

@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/public/cesium
+/public/maplibre
 /public/test_3d

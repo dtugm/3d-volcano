@@ -1,38 +1,340 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
+/* Landscape phones and short windows. */
+@custom-variant short (@media (max-height: 500px));
+
+/*
+ * Design tokens follow the "site" look of the DT FT UGM twin (same names and
+ * structure) with a volcanic palette: warm ash neutrals and a lava brand.
+ */
+@theme inline {
+  --font-sans: var(--font-jakarta-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-jakarta: var(--font-jakarta-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* One typeface everywhere: codes and numbers use Plus Jakarta Sans too
+     (with tabular figures, see below). */
+  --font-mono: var(--font-jakarta-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --color-background: var(--site-canvas);
+  --color-foreground: var(--site-ink);
+
+  --color-canvas: var(--site-canvas);
+  --color-surface: var(--site-surface);
+  --color-ink: var(--site-ink);
+  --color-ink-strong: var(--site-ink-strong);
+  --color-ink-body: var(--site-ink-body);
+  --color-muted: var(--site-muted);
+  --color-subtle: var(--site-subtle);
+  --color-brand: var(--site-brand);
+  --color-brand-hover: var(--site-brand-hover);
+  --color-brand-deep: var(--site-brand-deep);
+  --color-brand-soft: var(--site-brand-soft);
+  --color-brand-tint: var(--site-brand-tint);
+  --color-line: var(--site-line);
+  --color-mist: var(--site-mist);
+  --color-chip: var(--site-chip);
+  --color-chip-fg: var(--site-chip-fg);
+  --color-warn-soft: var(--site-warn-soft);
+  --color-warn-fg: var(--site-warn-fg);
+  --color-amber: var(--site-amber);
+  --color-amber-soft: var(--site-amber-soft);
+  --color-ok: var(--site-ok);
+  --color-sky: var(--site-sky);
+  --color-water-soft: var(--site-water-soft);
+  --color-slate: var(--site-slate);
+  --color-map: var(--site-map);
+  --color-hint: var(--site-hint);
+
+  --animate-fade-in: fade-in 0.22s ease-out both;
+  --animate-pop-in: pop-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-live: live-ring 2s ease-out infinite;
+  --animate-float: float 6s ease-in-out infinite;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #1a2332;
+  --site-canvas: #f5f2ef;
+  --site-surface: #ffffff;
+  --site-ink: #261d19;
+  --site-ink-strong: #1b120e;
+  --site-ink-body: #4b403a;
+  --site-muted: #6d6059;
+  --site-subtle: #9b8e86;
+  --site-brand: #d9480f;
+  --site-brand-hover: #c03e0b;
+  --site-brand-deep: #a3360b;
+  --site-brand-soft: #ffe6d8;
+  --site-brand-tint: rgba(217, 72, 15, 0.13);
+  --site-line: #f2ece8;
+  --site-mist: #e6ddd7;
+  --site-chip: #f2ece8;
+  --site-chip-fg: #4b403a;
+  --site-warn-soft: #ffe9d2;
+  --site-warn-fg: #8a4300;
+  --site-amber: #f59f00;
+  --site-amber-soft: #fff4d6;
+  --site-ok: #12a06e;
+  --site-sky: #e6f0ff;
+  --site-water-soft: #edf4fe;
+  --site-slate: #3f3530;
+  --site-map: #ebe4de;
+  --site-hint: rgba(30, 20, 16, 0.86);
+  --site-shadow: 0 1px 2px rgba(43, 24, 14, 0.04), 0 12px 32px -12px rgba(43, 24, 14, 0.16);
+  /* Cards floating over the map. */
+  --site-float: 0 2px 6px rgba(43, 24, 14, 0.1), 0 14px 34px -6px rgba(43, 24, 14, 0.3);
+  --focus-ring: var(--site-brand);
+  color-scheme: light;
 }
 
 .dark {
-  --background: #1a2332;
-  --foreground: #ffffff;
+  --site-canvas: #110d0b;
+  --site-surface: #1c1613;
+  --site-ink: #f2ebe6;
+  --site-ink-strong: #faf6f3;
+  --site-ink-body: #d4c8c0;
+  --site-muted: #a8988e;
+  --site-subtle: #7d6e65;
+  --site-brand: #ff6a2b;
+  --site-brand-hover: #ff8550;
+  --site-brand-deep: #ffb08a;
+  --site-brand-soft: #3d2116;
+  --site-brand-tint: rgba(255, 106, 43, 0.2);
+  --site-line: #2a211c;
+  --site-mist: #3a2d26;
+  --site-chip: #2a211c;
+  --site-chip-fg: #d6cbc3;
+  --site-warn-soft: #3b2a17;
+  --site-warn-fg: #ffb877;
+  --site-amber: #ffb547;
+  --site-amber-soft: #3a3018;
+  --site-ok: #2fbf88;
+  --site-sky: #d6e6ff;
+  --site-water-soft: #1c2a40;
+  --site-slate: #57493f;
+  --site-map: #1a1411;
+  --site-hint: rgba(10, 6, 4, 0.84);
+  --site-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+  --site-float: 0 2px 6px rgba(0, 0, 0, 0.35), 0 16px 36px -6px rgba(0, 0, 0, 0.65);
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+@layer base {
+  /* `@theme inline` does not emit --font-* as CSS variables, so refer to the
+     next/font variable (set on <html>) directly. Form controls inherit it. */
+  html {
+    font-family: var(--font-jakarta-family), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  body {
+    background: var(--site-canvas);
+    color: var(--site-ink);
+  }
+  input,
+  select,
+  textarea,
+  button {
+    font-family: inherit;
+  }
+  /* `font-mono` was used for codes and figures: keep them aligned. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+@layer components {
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .thin-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(150 132 120 / 0.35) transparent;
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--site-line) 25%, var(--site-mist) 50%, var(--site-line) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+}
+
+.maplibregl-ctrl-attrib {
+  display: none;
+}
+.twin-map .maplibregl-map {
+  font-family: inherit;
 }
 
 @keyframes fade-in {
   from {
     opacity: 0;
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes live-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--site-ok) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
   }
 }
 
-.animate-fade-in {
-  animation: fade-in 200ms ease-out 150ms both;
+/* ------------------------------------------------------------ landing */
+@keyframes rise {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes ken-burns {
+  from {
+    transform: scale(1.14);
+  }
+  to {
+    transform: scale(1.02);
+  }
+}
+@keyframes ember {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0;
+  }
+  12% {
+    opacity: var(--ember-opacity, 0.9);
+  }
+  100% {
+    transform: translate3d(var(--ember-drift, 40px), -85vh, 0) scale(0.2);
+    opacity: 0;
+  }
+}
+@keyframes scan {
+  0% {
+    transform: translateY(-10vh);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
+}
+@keyframes gradient-pan {
+  to {
+    background-position: 200% center;
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes scroll-dot {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
+
+/* Scroll reveal: `useReveal` adds .is-visible once the element is on screen. */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--delay, 0ms);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Cursor-following highlight; --mx / --my are set by the card. */
+.spotlight {
+  background-image: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 0%),
+    var(--site-brand-tint),
+    transparent 65%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .motion-anim {
+    animation: none !important;
+  }
 }

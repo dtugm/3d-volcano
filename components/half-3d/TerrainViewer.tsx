@@ -7,7 +7,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import FpsOverlay from "@/components/fps-overlay";
 import { createTerrainMesh } from "@/lib/half-3d/create-terrain-mesh";
 import { loadGeoTiff } from "@/lib/half-3d/load-geotiff";
-import { EpochInfo, EPOCHS } from "@/lib/half-3d/types";
+import type { EpochInfo } from "@/lib/half-3d/types";
+import { useTranslation } from "@/lib/i18n";
 
 import LayerControls from "./LayerControls";
 
@@ -15,7 +16,8 @@ interface TerrainViewerProps {
   epochs?: EpochInfo[];
 }
 
-export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
+export default function TerrainViewer({ epochs = [] }: TerrainViewerProps) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const epochsRef = useRef(epochs);
   const sceneRef = useRef<{
@@ -25,9 +27,11 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
     controls: OrbitControls;
     meshes: THREE.Mesh[];
     animationId: number;
+    invalidate: () => void;
   } | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loadProgress, setLoadProgress] = useState(0);
   const [layerVisibility, setLayerVisibility] = useState<boolean[]>(() =>
     epochs.map(() => true),
@@ -35,9 +39,15 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
   const [verticalExaggeration, setVerticalExaggeration] = useState(1);
   const [layerSpacing, setLayerSpacing] = useState(0);
   const [showFps, setShowFps] = useState(false);
+  const showFpsRef = useRef(showFps);
   const [fps, setFps] = useState(0);
   const [frameTime, setFrameTime] = useState(0);
   const fpsRef = useRef({ lastTime: 0, frames: 0 });
+
+  useEffect(() => {
+    showFpsRef.current = showFps;
+    fpsRef.current = { lastTime: performance.now(), frames: 0 };
+  }, [showFps]);
 
   const handleToggleLayer = useCallback((index: number) => {
     setLayerVisibility((prev) => {
@@ -47,13 +57,23 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
     });
   }, []);
 
+  const handleSetAllLayers = useCallback(
+    (visible: boolean) => {
+      setLayerVisibility(epochs.map(() => visible));
+    },
+    [epochs],
+  );
+
   // Initialize Three.js scene and load data
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      powerPreference: "high-performance",
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(0x0f1419);
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -89,6 +109,14 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
     const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x362d1b, 0.3);
     scene.add(hemisphereLight);
 
+    // Render on demand: only draw when the camera moves or the scene changes.
+    // controls.update() keeps running every frame so damping still settles.
+    let needsRender = true;
+    const invalidate = () => {
+      needsRender = true;
+    };
+    controls.addEventListener("change", invalidate);
+
     // Store refs
     const state = {
       renderer,
@@ -97,6 +125,7 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
       controls,
       meshes: [] as THREE.Mesh[],
       animationId: 0,
+      invalidate,
     };
     sceneRef.current = state;
 
@@ -104,8 +133,13 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
     function animate() {
       state.animationId = requestAnimationFrame(animate);
       controls.update();
+
+      // The FPS overlay measures a continuous loop.
+      if (!needsRender && !showFpsRef.current) return;
+      needsRender = false;
       renderer.render(scene, camera);
 
+      if (!showFpsRef.current) return;
       const now = performance.now();
       fpsRef.current.frames++;
       const delta = now - fpsRef.current.lastTime;
@@ -127,6 +161,7 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
+      invalidate();
     });
     resizeObserver.observe(container);
 
@@ -143,7 +178,15 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
         return data;
       });
 
-      const results = await Promise.all(promises);
+      let results;
+      try {
+        results = await Promise.all(promises);
+      } catch (err) {
+        if (!cancelled) {
+          setLoadError(err instanceof Error ? err.message : String(err));
+        }
+        return;
+      }
       if (cancelled) return;
 
       // Create meshes (geometry built once with exaggeration=1.0)
@@ -152,7 +195,7 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
         const mesh = createTerrainMesh(data, epochsRef.current[i].color);
         mesh.name = epochsRef.current[i].id;
         mesh.scale.y = 1; // initial vertical exaggeration via scale
-        mesh.position.y = i * 0; // initial spacing
+        mesh.position.y = 0; // initial spacing
         scene.add(mesh);
         meshes.push(mesh);
       });
@@ -174,6 +217,7 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
       );
       camera.lookAt(center);
       controls.update();
+      invalidate();
 
       setLoading(false);
     })();
@@ -182,6 +226,7 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
       cancelled = true;
       cancelAnimationFrame(state.animationId);
       resizeObserver.disconnect();
+      controls.removeEventListener("change", invalidate);
       controls.dispose();
 
       state.meshes.forEach((mesh) => {
@@ -205,7 +250,8 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
     state.meshes.forEach((mesh, i) => {
       mesh.visible = layerVisibility[i];
     });
-  }, [layerVisibility]);
+    state.invalidate();
+  }, [layerVisibility, loading]);
 
   // Update vertical exaggeration — just changes mesh.scale.y (no geometry rebuild)
   useEffect(() => {
@@ -214,7 +260,8 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
     state.meshes.forEach((mesh) => {
       mesh.scale.y = verticalExaggeration;
     });
-  }, [verticalExaggeration]);
+    state.invalidate();
+  }, [verticalExaggeration, loading]);
 
   // Update layer spacing — just changes mesh.position.y (no geometry rebuild)
   useEffect(() => {
@@ -223,37 +270,59 @@ export default function TerrainViewer({ epochs = EPOCHS }: TerrainViewerProps) {
     state.meshes.forEach((mesh, i) => {
       mesh.position.y = i * layerSpacing;
     });
-  }, [layerSpacing]);
+    state.invalidate();
+  }, [layerSpacing, loading]);
 
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full h-full" />
 
       {loading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0F1419]">
-          <div className="text-white text-lg mb-2">Loading Terrain Data...</div>
-          <div className="text-white/60 text-sm">
-            {loadProgress} / {epochs.length} files loaded
-          </div>
-          <div className="w-48 h-1 bg-white/20 rounded-full mt-3 overflow-hidden">
-            <div
-              className="h-full bg-white rounded-full transition-all duration-300"
-              style={{ width: `${(loadProgress / epochs.length) * 100}%` }}
-            />
-          </div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0F1419] px-6 text-center">
+          {loadError ? (
+            <>
+              <div className="text-red-300 text-sm font-medium mb-1">
+                {t.common.error}
+              </div>
+              <div className="text-white/50 text-xs max-w-sm break-words">
+                {loadError}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-white text-base font-medium mb-1">
+                {t.slice.loading}
+              </div>
+              <div className="text-white/60 text-xs tabular-nums">
+                {loadProgress} / {epochs.length} {t.slice.filesLoaded}
+              </div>
+              <div className="w-56 h-1 bg-white/15 rounded-full mt-4 overflow-hidden">
+                <div
+                  className="h-full bg-[#4285F4] rounded-full transition-all duration-300"
+                  style={{ width: `${(loadProgress / epochs.length) * 100}%` }}
+                />
+              </div>
+            </>
+          )}
         </div>
       )}
 
       {!loading && (
-        <LayerControls
-          epochs={epochs}
-          layerVisibility={layerVisibility}
-          onToggleLayer={handleToggleLayer}
-          verticalExaggeration={verticalExaggeration}
-          onExaggerationChange={setVerticalExaggeration}
-          layerSpacing={layerSpacing}
-          onSpacingChange={setLayerSpacing}
-        />
+        <>
+          <LayerControls
+            epochs={epochs}
+            layerVisibility={layerVisibility}
+            onToggleLayer={handleToggleLayer}
+            onSetAllLayers={handleSetAllLayers}
+            verticalExaggeration={verticalExaggeration}
+            onExaggerationChange={setVerticalExaggeration}
+            layerSpacing={layerSpacing}
+            onSpacingChange={setLayerSpacing}
+          />
+          <div className="pointer-events-none absolute bottom-4 left-4 hidden sm:block rounded-full bg-black/50 backdrop-blur-sm border border-white/10 px-3 py-1.5 text-[11px] text-white/70">
+            {t.slice.hint}
+          </div>
+        </>
       )}
 
       <FpsOverlay

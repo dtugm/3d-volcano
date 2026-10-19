@@ -1,130 +1,82 @@
 "use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
+import React from "react";
 
+import { DesignIcon } from "@/components/site/DesignIcon";
+import { cn } from "@/lib/cn";
 import { useTranslation } from "@/lib/i18n";
 
-import { LanguagesIcon, SunIcon } from "../icons";
+const roundButton =
+  "grid size-10 shrink-0 place-items-center rounded-full bg-surface text-ink-body transition-colors hover:bg-brand-soft";
 
 export const LanguageButton: React.FC = () => {
   const { locale, toggleLocale } = useTranslation();
-
   return (
     <button
-      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300"
+      type="button"
+      className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-surface px-3.5 text-[12px] font-bold text-ink-body uppercase transition-colors hover:bg-brand-soft"
       onClick={toggleLocale}
       aria-label={`Switch to ${locale === "en" ? "Indonesian" : "English"}`}
     >
-      <LanguagesIcon className="w-4 h-4" aria-hidden="true" />
-      <span className="uppercase font-medium text-xs">{locale}</span>
+      <DesignIcon name="lang" size={16} />
+      {locale}
     </button>
   );
 };
 
-export const ThemeButton: React.FC<{ onToggleTheme: VoidFunction }> = ({
-  onToggleTheme,
-}) => (
-  <button
-    className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300"
-    onClick={onToggleTheme}
-  >
-    <SunIcon className="w-4 h-4" aria-hidden="true" />
-  </button>
-);
+export const ThemeButton: React.FC<{ onToggleTheme: VoidFunction }> = ({ onToggleTheme }) => {
+  const { resolvedTheme } = useTheme();
+  return (
+    <button type="button" className={roundButton} onClick={onToggleTheme} aria-label="Toggle theme">
+      <DesignIcon name={resolvedTheme === "dark" ? "sun" : "moon"} size={16} />
+    </button>
+  );
+};
 
-const PAGES = [
-  { path: "/", label: "Main Viewer" },
-  { path: "/half-3d", label: "3D Terrain" },
-];
-
-const PageSwitcher: React.FC = () => {
-  const router = useRouter();
+/** Pill navigation between the site's pages. */
+export const ModuleTabs: React.FC<{ className?: string }> = ({ className }) => {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const { t } = useTranslation();
 
-  const current = PAGES.find((p) => p.path === pathname) ?? PAGES[0];
-
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => setOpen(false), 150);
-  };
+  const tabs = [
+    { href: "/", label: t.nav.home },
+    { href: "/digital-twin", label: t.nav.digitalTwin },
+    { href: "/slice-comparison", label: t.nav.sliceComparison },
+  ];
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+    <nav
+      aria-label="Modules"
+      className={cn("flex h-[43px] items-center gap-0.5 rounded-full bg-surface p-1", className)}
     >
-      <button
-        className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300 text-xs font-medium"
-        onClick={() => setOpen((v) => !v)}
-      >
-        {current.label}
-        <svg
-          className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-          aria-hidden="true"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-full mt-1 min-w-36 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden z-50">
-          {PAGES.map((page) => (
-            <button
-              key={page.path}
-              className={`w-full text-left px-3 py-2 text-xs transition-colors ${
-                pathname === page.path
-                  ? "bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white font-medium"
-                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
-              }`}
-              onClick={() => {
-                router.push(page.path);
-                setOpen(false);
-              }}
-            >
-              {page.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+      {tabs.map(({ href, label }) => {
+        const active = pathname === href;
+        return (
+          <Link
+            key={href}
+            href={href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "flex h-full items-center rounded-full px-3.5 text-[13px] whitespace-nowrap transition-colors duration-300",
+              active ? "bg-brand font-bold text-white" : "font-semibold text-ink-body hover:bg-brand-soft",
+            )}
+          >
+            {label}
+          </Link>
+        );
+      })}
+    </nav>
   );
 };
 
 export const NavbarActions: React.FC = () => {
-  const { theme, setTheme } = useTheme();
-
-  const handleToggleTheme = () => {
-    console.log("handleTheme", theme);
-    switch (theme) {
-      case "light":
-      case "system":
-        setTheme("dark");
-        break;
-      case "dark":
-        setTheme("light");
-      case "system":
-      default:
-        break;
-    }
-  };
-
+  const { resolvedTheme, setTheme } = useTheme();
   return (
     <div className="flex items-center gap-2">
-      <PageSwitcher />
       <LanguageButton />
-      <ThemeButton onToggleTheme={handleToggleTheme} />
+      <ThemeButton onToggleTheme={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} />
     </div>
   );
 };
